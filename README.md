@@ -6,10 +6,7 @@ Rust port of [Kuplung](https://github.com/supudo/kuplung)
 
 ### Using/Including
 
-- [imgui-rs](https://github.com/Gekkio/imgui-rs)
-
-### IDE
-VS Code
+- [Dear ImGui Rust bindings by imgui-rs](https://github.com/Gekkio/imgui-rs)
 
 ### License
 
