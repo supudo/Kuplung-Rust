@@ -1,0 +1,22 @@
+[package]
+name = "kuplung"
+description = "Rust port of Kuplung"
+version = "0.1.0"
+repository = "https://github.com/supudo/Kuplung-Rust"
+authors = ["Sergey Petrov <supudo@gmail.com>"]
+keywords = ["OpenGL", "SDL", "graphics", "rendering", "dear-imgui"]
+categories = ["opengl", "graphics", "rendering","graphics-programming"]
+
+[dependencies]
+rand = "0.3.14"
+protobuf = "2.5.0"
+glm = "0.2.3"
+assimp = "0.3.1"
+sdl2 = "0.32.2"
+gl = "0.12.0"
+gfx = "0.18.0"
+gfx_window_glutin = "0.30.0"
+glutin = "0.20.0"
+imgui = "0.0.23"
+imgui-gfx-renderer = "0.0.23"
+imgui-winit-support = "0.0.23"

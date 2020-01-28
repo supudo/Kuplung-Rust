@@ -1,0 +1,31 @@
+# Kuplung Rendering Settings file
+
+General:
+  ShowCube: false
+  Fov: 45.0
+  RatioWidth: 4.0
+  RatioHeight: 3.0
+  PlaneClose: 1.0
+  PlaneFar: 1000.0
+  GammaCoeficient: 1.0
+  ShowPickRays: false
+  ShowPickRaysSingle: true
+  RayAnimate: false
+  RayOriginX: 0.0
+  RayOriginY: 0.0
+  RayOriginZ: 0.0
+  RayDraw: false
+  RayDirectionX: 0.0
+  RayDirectionY: 0.0
+  RayDirectionZ: 0.0
+  UseOcclusionCulling: true
+
+Axis:
+  ShowAxisHelpers: true
+  ShowZAxis: true
+
+Grid:
+  WorldGridSizeSquares: 30
+  WorldGridFixedWithWorld: true
+  ShowGrid: true
+  ActAsMirror: false

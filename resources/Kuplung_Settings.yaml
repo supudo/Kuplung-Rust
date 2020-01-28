@@ -1,0 +1,31 @@
+# Kuplung Settings file
+
+# App settings
+App:
+  appVersion: 1.0 d
+  currentFolder: 
+  appFolder: 
+  RendererType: 1
+  showLog: true
+
+# SDL & Window Settings
+AppWindow:
+  SDL_Window_Width: 1600
+  SDL_Window_Height: 900
+  LogWidth: 400
+  LogHeight: 300
+  FileBrowserWidth: 500
+  FileBrowserHeight: 300
+
+Rendering:
+  FramesPerSecond: 30.0
+  ShowGLErrors: true
+
+# GUI - clear color
+AppGui:
+  guiClearColor: [70.0, 70.0, 70.0, 255.0]
+
+# Consumption refresh interval in seconds
+Consumption:
+  Consumption_Interval_CPU: 5
+  Consumption_Interval_Memory: 5

@@ -1,0 +1,84 @@
+// protoc --go_out=../../saveopen/ KuplungDefinitions.proto 
+
+syntax = "proto2";
+
+package saveopen;
+
+message Vec2 {
+  required float x = 1;
+  required float y = 2;
+}
+
+message Vec3 {
+  required float x = 1;
+  required float y = 2;
+  required float z = 3;
+}
+
+message Vec4 {
+  required float x = 1;
+  required float y = 2;
+  required float z = 3;
+  required float w = 4;
+}
+
+message ObjectCoordinate {
+  required bool animate = 1;
+  required float point = 2;
+}
+
+message MaterialColor {
+  required bool colorPickerOpen = 1;
+  required bool animate = 2;
+  required float strength = 3;
+  required Vec3 color = 4;
+}
+
+message MeshMaterialTextureImage {
+  required string Filename = 1;
+  required string Image = 2;
+  required int32 Width = 3;
+  required int32 Height = 4;
+  required bool UseTexture = 5;
+  repeated string Commands = 6;
+}
+
+message MeshModelMaterial {
+  required int32 MaterialID = 1;
+  required string MaterialTitle = 2;
+
+  required Vec3 AmbientColor = 3;
+  required Vec3 DiffuseColor = 4;
+  required Vec3 SpecularColor = 5;
+  required Vec3 EmissionColor = 6;
+  required float SpecularExp = 7;
+  required float Transparency = 8;
+  required fixed32 IlluminationMode = 9;
+  required float OpticalDensity = 10;
+
+  required MeshMaterialTextureImage TextureAmbient = 11;
+  required MeshMaterialTextureImage TextureDiffuse = 12;
+  required MeshMaterialTextureImage TextureSpecular = 13;
+  required MeshMaterialTextureImage TextureSpecularExp = 14;
+  required MeshMaterialTextureImage TextureDissolve = 15;
+  required MeshMaterialTextureImage TextureBump = 16;
+  required MeshMaterialTextureImage TextureDisplacement = 17;
+}
+
+message Mesh {
+  required int32 ID = 1;
+  required string File = 2;
+  required string FilePath = 3;
+  required string ModelTitle = 4;
+  required string MaterialTitle = 5;
+  required int32 countVertices = 6;
+  required int32 countTextureCoordinates = 7;
+  required int32 countNormals = 8;
+  required int32 countIndices = 9;
+
+  required MeshModelMaterial ModelMaterial = 10;
+  repeated Vec3 vertices = 11;
+  repeated Vec2 texture_coordinates = 12;
+  repeated Vec3 normals = 13;
+  repeated fixed32 indices = 14;
+}

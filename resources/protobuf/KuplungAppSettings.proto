@@ -1,0 +1,168 @@
+// protoc --go_out=../../saveopen/ KuplungAppSettings.proto 
+
+syntax = "proto2";
+
+package saveopen;
+
+import "KuplungDefinitions.proto";
+
+message GUISettings {
+  required bool ShowCube = 1;
+  required float Fov = 2;
+  required float RatioWidth = 3;
+  required float RatioHeight = 4;
+  required float PlaneClose = 5;
+  required float PlaneFar = 6;
+  required float GammaCoeficient = 7;
+
+  required bool ShowPickRays = 8;
+  required bool ShowPickRaysSingle = 9;
+  required bool RayAnimate = 10;
+  required float RayOriginX = 11;
+  required float RayOriginY = 12;
+  required float RayOriginZ = 13;
+  required string RayOriginXS = 14;
+  required string RayOriginYS = 15;
+  required string RayOriginZS = 16;
+  required bool RayDraw = 17;
+  required float RayDirectionX = 18;
+  required float RayDirectionY = 19;
+  required float RayDirectionZ = 20;
+  required string RayDirectionXS = 21;
+  required string RayDirectionYS = 22;
+  required string RayDirectionZS = 23;
+
+  required bool OcclusionCulling = 24;
+  required bool RenderingDepth = 25;
+  required uint32 SelectedViewModelSkin = 26;
+  required bool ShowBoundingBox = 27;
+  required bool BoundingBoxRefresh = 28;
+  required float BoundingBoxPadding = 29;
+  required Vec4 OutlineColor = 30;
+  required bool OutlineColorPickerOpen = 31;
+  required float OutlineThickness = 32;
+
+  required bool VertexSphereVisible = 33;
+  required bool VertexSphereColorPickerOpen = 34;
+  required bool VertexSphereIsSphere = 35;
+  required bool VertexSphereShowWireframes = 36;
+  required float VertexSphereRadius = 37;
+  required int32 VertexSphereSegments = 38;
+  required Vec4 VertexSphereColor = 39;
+
+  required bool ShowAllVisualArtefacts = 40;
+
+  required bool ShowZAxis = 41;
+
+  required int32 WorldGridSizeSquares = 42;
+  required bool WorldGridFixedWithWorld = 43;
+  required bool ShowGrid = 44;
+  required bool ActAsMirror = 45;
+
+  required int32 SkyboxSelectedItem = 46;
+
+  required CameraSettings camera = 47;
+  optional GridSettings grid = 48;
+  repeated LightObject lights = 49;
+
+	required float UIAmbientLightX = 50;
+  required float UIAmbientLightY = 51;
+  required float UIAmbientLightZ = 52;
+
+	required float SolidLightDirectionX = 53;
+  required float SolidLightDirectionY = 54;
+  required float SolidLightDirectionZ = 55;
+
+	required Vec3 SolidLightMaterialColor = 56;
+	required Vec3 SolidLightAmbient = 57;
+	required Vec3 SolidLightDiffuse = 58;
+	required Vec3 SolidLightSpecular = 59;
+
+	required float SolidLightAmbientStrength = 60;
+  required float SolidLightDiffuseStrength = 61;
+  required float SolidLightSpecularStrength = 62;
+
+  required bool SolidLightMaterialColorColorPicker = 63;
+  required bool SolidLightAmbientColorPicker = 64;
+  required bool SolidLightDiffuseColorPicker = 65;
+  required bool SolidLightSpecularColorPicker = 66;
+
+  required bool DeferredTestMode = 67;
+  required bool DeferredTestLights = 68;
+  required bool DeferredRandomizeLightPositions = 69;
+  required int32 LightingPassDrawMode = 70;
+  required int32 DeferredTestLightsNumber = 71;
+  required float DeferredAmbientStrength = 72;
+
+  required bool DebugShadowTexture = 73;
+}
+
+message CameraSettings {
+  required Vec3 cameraPosition = 1;
+  required Vec3 View_Eye = 2;
+  required Vec3 View_Center = 3;
+  required Vec3 View_Up = 4;
+  required ObjectCoordinate positionX = 5;
+  required ObjectCoordinate positionY = 6;
+  required ObjectCoordinate positionZ = 7;
+  required ObjectCoordinate rotateX = 8;
+  required ObjectCoordinate rotateY = 9;
+  required ObjectCoordinate rotateZ = 10;
+  required ObjectCoordinate rotateCenterX = 11;
+  required ObjectCoordinate rotateCenterY = 12;
+  required ObjectCoordinate rotateCenterZ = 13;
+}
+
+message GridSettings {
+  required bool actAsMirror = 1;
+  required int32 gridSize = 2;
+  required ObjectCoordinate positionX = 3;
+  required ObjectCoordinate positionY = 4;
+  required ObjectCoordinate positionZ = 5;
+  required ObjectCoordinate rotateX = 6;
+  required ObjectCoordinate rotateY = 7;
+  required ObjectCoordinate rotateZ = 8;
+  required ObjectCoordinate scaleX = 9;
+  required ObjectCoordinate scaleY = 10;
+  required ObjectCoordinate scaleZ = 11;
+  required float transparency = 12;
+}
+
+message LightObject {
+  required string title = 1;
+  required string description = 2;
+  required int32 type = 3;
+  required bool showLampObject = 4;
+  required bool showLampDirection = 5;
+  required bool showInWire = 6;
+
+  required ObjectCoordinate positionX = 7;
+  required ObjectCoordinate positionY = 8;
+  required ObjectCoordinate positionZ = 9;
+  
+  required ObjectCoordinate directionX = 10;
+  required ObjectCoordinate directionY = 11;
+  required ObjectCoordinate directionZ = 12;
+
+  required ObjectCoordinate scaleX = 13;
+  required ObjectCoordinate scaleY = 14;
+  required ObjectCoordinate scaleZ = 15;
+
+  required ObjectCoordinate rotateX = 16;
+  required ObjectCoordinate rotateY = 17;
+  required ObjectCoordinate rotateZ = 18;
+  
+  required ObjectCoordinate rotateCenterX = 19;
+  required ObjectCoordinate rotateCenterY = 20;
+  required ObjectCoordinate rotateCenterZ = 21;
+  
+  required MaterialColor ambient = 22;
+  required MaterialColor diffuse = 23;
+  required MaterialColor specular = 24;
+
+  required ObjectCoordinate lCutOff = 25;
+  required ObjectCoordinate lOuterCutOff = 26;
+  required ObjectCoordinate lConstant = 27;
+  required ObjectCoordinate lLinear = 28;
+  required ObjectCoordinate lQuadratic = 29;
+}
