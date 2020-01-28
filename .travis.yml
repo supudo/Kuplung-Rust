@@ -1,8 +1,6 @@
 language: rust
 rust:
   - stable
-  - beta
-  - nightly
 
 cache:
   directories:
@@ -15,5 +13,4 @@ install:
   - (cd SDL2-2.0.8 && ./configure && make && sudo make install)
 
 script:
-  - cargo build --all-targets --verbose
-  - cargo test --verbose
+  - cargo build --verbose
