@@ -1,22 +1,21 @@
 [package]
 name = "kuplung"
 description = "Rust port of Kuplung"
-version = "0.1.0"
+version = "0.0.1"
 repository = "https://github.com/supudo/Kuplung-Rust"
 authors = ["Sergey Petrov <supudo@gmail.com>"]
-keywords = ["OpenGL", "SDL", "graphics", "rendering", "dear-imgui"]
+keywords = ["OpenGL", "graphics", "rendering"]
 categories = ["opengl", "graphics", "rendering","graphics-programming"]
 
+edition = "2021"
+
 [dependencies]
-rand = "0.3.14"
-protobuf = "2.5.0"
-glm = "0.2.3"
-assimp = "0.3.1"
-sdl2 = "0.32.2"
-gl = "0.12.0"
-gfx = "0.18.0"
-gfx_window_glutin = "0.30.0"
-glutin = "0.20.0"
-imgui = "0.0.23"
-imgui-gfx-renderer = "0.0.23"
-imgui-winit-support = "0.0.23"
+winit = "0.26.1"
+gl = "0.14.0"
+egui = { version = "0.17.0", default-features = false, features = ["single_threaded"] }
+egui_wgpu_backend = "0.16"
+egui-winit = "0.17.0"
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+wgpu = "0.12"
+winit_input_helper = "0.11"
