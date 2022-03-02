@@ -6,8 +6,8 @@ repository = "https://github.com/supudo/Kuplung-Rust"
 authors = ["Sergey Petrov <supudo@gmail.com>"]
 keywords = ["OpenGL", "graphics", "rendering"]
 categories = ["opengl", "graphics", "rendering","graphics-programming"]
-
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 winit = "0.26.1"
@@ -19,6 +19,9 @@ log = "0.4"
 serde = { version = "1.0", features = ["derive"] }
 wgpu = "0.12"
 winit_input_helper = "0.11"
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
 
 [lib]
 name = "configuration"
