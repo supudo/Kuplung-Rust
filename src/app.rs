@@ -7,17 +7,12 @@ use winit::{
 
 extern crate gl;
 
-mod Configuration;
-
-const WINDOW_WIDTH: u32 = 800;
-const WINDOW_HEIGHT: u32 = 600;
-
-pub fn KuplungApp() {
+pub fn kuplung_app() {
     let event_loop = EventLoop::new();
     let builder = WindowBuilder::new()
-        .with_title(Configuration::APP_TITLE)
+        .with_title(configuration::APP_TITLE)
         .with_resizable(true)
-        .with_inner_size(winit::dpi::LogicalSize::new(WINDOW_WIDTH, WINDOW_HEIGHT));
+        .with_inner_size(winit::dpi::LogicalSize::new(configuration::WINDOW_WIDTH, configuration::WINDOW_HEIGHT));
     let window = builder.build(&event_loop).unwrap();
 
     gl::load_with(|_s| window.hwnd() as *const _);
