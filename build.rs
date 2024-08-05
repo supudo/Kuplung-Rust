@@ -6,7 +6,7 @@ use std::{
 
 use gl_generator::{Api, Fallbacks, Profile, Registry, StructGenerator};
 
-const COPY_DIR: &'static str = "assets";
+const ASSETS_DIR: &'static str = "assets";
 
 fn main()-> io::Result<()> {
   let dest = PathBuf::from(&env::var("OUT_DIR").unwrap());
@@ -17,16 +17,15 @@ fn main()-> io::Result<()> {
     .unwrap();
 
   // copy the assets folder
-  let assetsFolder = env::var("OUT_DIR").unwrap();
-  let assetsFolder = format!("{}/{}", assetsFolder, COPY_DIR);
-  println!("Copying assets to output folder = {}", assetsFolder);
-  let assetsRef = PathBuf::from(assetsFolder);
-
-  if assetsRef.exists() {
-    fs::remove_dir_all(&assetsRef).unwrap();
+  let assets_folder = env::var("OUT_DIR").unwrap();
+  let assets_folder = format!("{}/{}", assets_folder, ASSETS_DIR);
+  println!("Copying assets to output folder = {}", assets_folder);
+  let assets_ref = PathBuf::from(assets_folder);
+  if assets_ref.exists() {
+    fs::remove_dir_all(&assets_ref).unwrap();
   }
-  fs::create_dir(&assetsRef).unwrap();
-  copy_dir(COPY_DIR, &assetsRef);
+  fs::create_dir(&assets_ref).unwrap();
+  copy_dir(ASSETS_DIR, &assets_ref);
 
   if cfg!(target_os = "windows") {
     let mut res = winres::WindowsResource::new();

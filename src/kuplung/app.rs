@@ -20,7 +20,7 @@ use glutin::surface::{Surface, SwapInterval, WindowSurface};
 
 use glutin_winit::{DisplayBuilder, GlWindow};
 
-use crate::kuplung::configuration;
+use crate::settings::configuration;
 
 pub mod gl {
   #![allow(clippy::all)]
@@ -56,13 +56,10 @@ pub fn main(event_loop: winit::event_loop::EventLoop<()>) -> Result<(), Box<dyn 
   // that, because we can query only one config at a time on it, but all
   // normal platforms will return multiple configs, so we can find the config
   // with transparency ourselves inside the `reduce`.
-  let template = ConfigTemplateBuilder::new().with_alpha_size(8).with_transparency(cfg!(cgl_backend));
-
+  let template = ConfigTemplateBuilder::new().with_alpha_size(8).with_transparency(cfg!(wgl_backend));
   let display_builder = DisplayBuilder::new().with_window_attributes(Some(window_attributes));
-
   let mut app = App::new(template, display_builder);
   event_loop.run_app(&mut app)?;
-
   app.exit_state
 }
 
@@ -122,9 +119,6 @@ impl ApplicationHandler for App {
       })
     });
 
-    #[cfg(android_platform)]
-    println!("Android window available");
-
     let window = window.take().unwrap_or_else(|| {
       let window_attributes = Window::default_attributes()
         .with_transparent(true)
@@ -135,8 +129,7 @@ impl ApplicationHandler for App {
     let attrs = window
       .build_surface_attributes(Default::default())
       .expect("Failed to build surface attributes");
-    let gl_surface =
-      unsafe { gl_config.display().create_window_surface(&gl_config, &attrs).unwrap() };
+    let gl_surface = unsafe { gl_config.display().create_window_surface(&gl_config, &attrs).unwrap() };
 
     // Make it current.
     let gl_context = not_current_gl_context.make_current(&gl_surface).unwrap();
@@ -235,8 +228,7 @@ struct AppState {
   window: Window,
 }
 
-// Find the config with the maximum number of samples, so our triangle will be
-// smooth.
+// Find the config with the maximum number of samples, so our triangle will be smooth.
 pub fn gl_config_picker(configs: Box<dyn Iterator<Item = Config> + '_>) -> Config {
   configs
     .reduce(|accum, config| {
@@ -381,11 +373,7 @@ impl Drop for Renderer {
   }
 }
 
-unsafe fn create_shader(
-  gl: &gl::Gl,
-  shader: gl::types::GLenum,
-  source: &[u8],
-) -> gl::types::GLuint {
+unsafe fn create_shader(gl: &gl::Gl, shader: gl::types::GLenum, source: &[u8]) -> gl::types::GLuint {
   let shader = gl.CreateShader(shader);
   gl.ShaderSource(shader, 1, [source.as_ptr().cast()].as_ptr(), std::ptr::null());
   gl.CompileShader(shader);
@@ -402,8 +390,8 @@ fn get_gl_string(gl: &gl::Gl, variant: gl::types::GLenum) -> Option<&'static CSt
 #[rustfmt::skip]
 static VERTEX_DATA: [f32; 15] = [
   -0.5, -0.5,  1.0,  0.0,  0.0,
-  0.0,  0.5,  0.0,  1.0,  0.0,
-  0.5, -0.5,  0.0,  0.0,  1.0,
+   0.0,  0.5,  0.0,  1.0,  0.0,
+   0.5, -0.5,  0.0,  0.0,  1.0,
 ];
 
 const VERTEX_SHADER_SOURCE: &[u8] = b"
