@@ -1,28 +1,23 @@
 [package]
-name = "kuplung"
+name = "Kuplung-Rust"
 description = "Rust port of Kuplung"
-version = "0.0.1"
+version = "0.1.0"
+edition = "2021"
 repository = "https://github.com/supudo/Kuplung-Rust"
 authors = ["Sergey Petrov <supudo@gmail.com>"]
 keywords = ["OpenGL", "graphics", "rendering"]
-categories = ["opengl", "graphics", "rendering","graphics-programming"]
-edition = "2021"
 build = "build.rs"
 
 [dependencies]
-winit = "0.26.1"
-gl = "0.14.0"
-egui = { version = "0.17.0", default-features = false, features = ["single_threaded"] }
-egui_wgpu_backend = "0.16"
-egui-winit = "0.17.0"
-log = "0.4"
-serde = { version = "1.0", features = ["derive"] }
-wgpu = "0.12"
-winit_input_helper = "0.11"
+gl = "*"
+winit = "0.30.4"
+glutin = "0.32.0"
+glutin-winit = "0.5.0"
+raw-window-handle = "0.6.2"
+image = "0.25.2"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"
 
-[lib]
-name = "configuration"
-path = "src/settings/configuration.rs"
+[build-dependencies]
+gl_generator = "0.14"

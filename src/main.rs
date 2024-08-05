@@ -1,9 +1,5 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![deny(clippy::all)]
+mod kuplung;
 
-mod app;
-use app::kuplung_app;
-
-fn main() {
-    kuplung_app();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+  kuplung::app::main(winit::event_loop::EventLoop::new().unwrap())
 }
