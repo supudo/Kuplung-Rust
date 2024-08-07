@@ -4,7 +4,6 @@ use crate::settings::configuration;
 
 mod settings;
 
-#[!warn(unused_variables)]
 fn main() {
   let sdl_context = sdl2::init().unwrap();
 
