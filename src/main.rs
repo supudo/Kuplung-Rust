@@ -5,9 +5,8 @@ use crate::settings::configuration;
 mod settings;
 
 fn main() {
-  let sdl_context = sdl2::init().unwrap();
-
-  let video_system = sdl_context.video().unwrap();
+  let sdl_context = sdl2::init().expect("Error: SDL could not initialize!");
+  let video_system = sdl_context.video().expect("Error: SDL Video could not initialize!");
 
   let gl_attr = video_system.gl_attr();
   gl_attr.set_depth_size(23);
@@ -25,13 +24,13 @@ fn main() {
     .resizable()
     .allow_highdpi()
     .build()
-    .unwrap();
+    .expect("Error: Window could not be created!");
 
-  let gl_context = window.gl_create_context().unwrap();
+  let gl_context = window.gl_create_context().expect("Error: Unable to create OpenGL context!");
   let gl = gl::load_with(|s| video_system.gl_get_proc_address(s) as *const std::os::raw::c_void);
 
-  window.gl_make_current(&gl_context).unwrap();
-  video_system.gl_set_swap_interval(1).unwrap();
+  window.gl_make_current(&gl_context).expect("Error: Unable to set current context!");
+  video_system.gl_set_swap_interval(1).expect("Warning: Unable to set VSync!");
 
   unsafe {
     gl::ClearColor(0.3, 0.3, 0.5, 1.0);
