@@ -2,6 +2,7 @@
 
 extern crate sdl2;
 
+use sdl2::Sdl;
 use crate::settings::configuration;
 
 mod settings;
@@ -20,8 +21,9 @@ fn main() {
   gl_attr.set_context_minor_version(configuration::OPENGL_VERSION_MINOR);
   gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
   gl_attr.set_context_flags().debug().set();
-
+  
   let window = video_system.window(configuration::APP_TITLE, configuration::WINDOW_WIDTH, configuration::WINDOW_HEIGHT)
+    .position(configuration::WINDOW_POSITION_X, configuration::WINDOW_POSITION_Y)
     .opengl()
     .resizable()
     .allow_highdpi()
@@ -33,9 +35,16 @@ fn main() {
 
   window.gl_make_current(&gl_context).expect("Error: Unable to set current context!");
   video_system.gl_set_swap_interval(1).expect("Warning: Unable to set VSync!");
+  
+  /*let (dw, dh) = window.drawable_size();
+  unsafe {
+    configuration::DRAWABLE_SIZE_WIDTH = dw;
+    configuration::DRAWABLE_SIZE_HEIGHT = dh;
+  }*/
 
   unsafe {
-    gl::ClearColor(0.3, 0.3, 0.5, 1.0);
+    //gl::Viewport(0, 0, configuration::DRAWABLE_SIZE_WIDTH, configuration::DRAWABLE_SIZE_HEIGHT);
+    gl::ClearColor(configuration::GL_CLEAR_COLOR_R, configuration::GL_CLEAR_COLOR_G, configuration::GL_CLEAR_COLOR_B, configuration::GL_CLEAR_COLOR_A);
     gl::Clear(gl::COLOR_BUFFER_BIT);
   }
 
