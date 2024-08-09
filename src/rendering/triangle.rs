@@ -1,10 +1,18 @@
 use std::ffi::{CStr, CString};
+use std::io::Read;
 use std::ops::Deref;
 
 use glutin::prelude::*;
 
 use log::info;
 use crate::settings::configuration;
+
+#[rustfmt::skip]
+pub static VERTEX_DATA: [f32; 15] = [
+  -0.5, -0.5,  1.0,  0.0,  0.0,
+  0.0,  0.5,  0.0,  1.0,  0.0,
+  0.5, -0.5,  0.0,  0.0,  1.0,
+];
 
 pub mod gl {
   #![allow(clippy::all)]
@@ -38,8 +46,8 @@ impl Triangle {
         info!("[Kuplung] Shaders version on {}", shaders_version.to_string_lossy());
       }
 
-      let vertex_shader = create_shader(&gl, gl::VERTEX_SHADER, VERTEX_SHADER_SOURCE);
-      let fragment_shader = create_shader(&gl, gl::FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
+      let vertex_shader = create_shader(&gl, gl::VERTEX_SHADER, "assets/shaders/triangle.vert");
+      let fragment_shader = create_shader(&gl, gl::FRAGMENT_SHADER, "assets/shaders/triangle.frag");
 
       let program = gl.CreateProgram();
 
@@ -120,9 +128,16 @@ impl Drop for Triangle {
   }
 }
 
-unsafe fn create_shader(gl: &gl::Gl, shader: gl::types::GLenum, source: &[u8]) -> gl::types::GLuint {
+unsafe fn create_shader(gl: &gl::Gl, shader: gl::types::GLenum, shader_filepath: &str) -> gl::types::GLuint {
+  info!("[Kuplung] Loading shader file {}", shader_filepath);
+
+  let mut shader_file = std::fs::File::open(shader_filepath).expect("[Kuplung] Cannot fine the shader file specified!");
+  let mut shader_buffer: Vec<u8> = Vec::new();
+  shader_file.read_to_end(&mut shader_buffer).unwrap();
+  let shader_source = CString::new(shader_buffer).unwrap();
+
   let shader = gl.CreateShader(shader);
-  gl.ShaderSource(shader, 1, [source.as_ptr().cast()].as_ptr(), std::ptr::null());
+  gl.ShaderSource(shader, 1, [shader_source.as_ptr().cast()].as_ptr(), std::ptr::null());
   gl.CompileShader(shader);
   shader
 }
@@ -133,36 +148,3 @@ fn get_gl_string(gl: &gl::Gl, variant: gl::types::GLenum) -> Option<&'static CSt
     (!s.is_null()).then(|| CStr::from_ptr(s.cast()))
   }
 }
-
-#[rustfmt::skip]
-pub static VERTEX_DATA: [f32; 15] = [
-  -0.5, -0.5,  1.0,  0.0,  0.0,
-  0.0,  0.5,  0.0,  1.0,  0.0,
-  0.5, -0.5,  0.0,  0.0,  1.0,
-];
-
-pub const VERTEX_SHADER_SOURCE: &[u8] = b"
-#version 410 core
-precision mediump float;
-
-attribute vec2 position;
-attribute vec3 color;
-
-varying vec3 v_color;
-
-void main() {
-    gl_Position = vec4(position, 0.0, 1.0);
-    v_color = color;
-}
-\0";
-
-pub const FRAGMENT_SHADER_SOURCE: &[u8] = b"
-#version 410 core
-precision mediump float;
-
-varying vec3 v_color;
-
-void main() {
-    gl_FragColor = vec4(v_color, 1.0);
-}
-\0";
