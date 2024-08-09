@@ -1,8 +1,11 @@
 use std::error::Error;
+use std::ffi::CString;
 use std::num::NonZeroU32;
 use std::time::Instant;
 use env_logger::Env;
 use raw_window_handle::HasWindowHandle;
+
+use glow::Context;
 
 use glutin::config::ConfigTemplateBuilder;
 use glutin::context::{ContextApi, ContextAttributesBuilder, GlProfile, NotCurrentContext, PossiblyCurrentContext};
@@ -12,6 +15,8 @@ use glutin::surface::{Surface, SwapInterval, WindowSurface};
 
 use glutin_winit::{DisplayBuilder, GlWindow};
 
+use imgui_winit_glow_renderer_viewports::Renderer;
+use imgui_winit_support::winit::window::WindowBuilder;
 use log::info;
 
 use winit::application::ApplicationHandler;
@@ -100,6 +105,13 @@ impl ApplicationHandler for App {
       gl_display.create_context(&gl_config, &context_attributes).unwrap()
     });
 
+    let (window, gl_config) = DisplayBuilder::new()
+      .with_window_builder(Some(window_builder))
+      .build(&event_loop, self.template.b, |mut configs| {
+        configs.next().unwrap()
+      })
+      .expect("Failed to create main window");
+
     let window = window.take().unwrap_or_else(|| {
       let window_attributes = Window::default_attributes()
         .with_transparent(true)
@@ -114,6 +126,13 @@ impl ApplicationHandler for App {
 
     let gl_context = gl_context.make_current(&gl_surface).unwrap();
 
+    let glow = unsafe {
+      Context::from_loader_function(|name| {
+        let name = CString::new(name).unwrap();
+        gl_context.display().get_proc_address(&name)
+      })
+    };
+
     self.renderer.get_or_insert_with(|| rendering_manager::RenderingManager::new(gl_display));
 
     if let Err(res) = gl_surface.set_swap_interval(&gl_context, SwapInterval::Wait(NonZeroU32::new(1).unwrap())) {
@@ -122,6 +141,9 @@ impl ApplicationHandler for App {
 
     self.ui_manager.get_or_insert_with(|| ui_manager::UIManager::new());
     ui_manager::UIManager::configure_context(self.ui_manager.as_mut().unwrap(), &window);
+
+    let mut glow_renderer = Renderer::new(&mut self.ui_manager.as_mut().unwrap().imgui_context, &window, &glow)
+      .expect("[Kuplung] Failed to init Renderer!");
 
     assert!(self.state.replace(AppState { gl_context, gl_surface, window }).is_none());
   }
