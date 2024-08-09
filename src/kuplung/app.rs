@@ -41,7 +41,9 @@ pub fn main(event_loop: winit::event_loop::EventLoop<()>) -> Result<(), Box<dyn 
     .with_title(configuration::APP_TITLE)
     .with_position(Position::Logical(LogicalPosition::new(configuration::WINDOW_POSITION_X, configuration::WINDOW_POSITION_Y)))
     .with_inner_size(winit::dpi::LogicalSize::new(configuration::WINDOW_WIDTH, configuration::WINDOW_HEIGHT))
-    .with_window_icon(Some(icon));
+    .with_window_icon(Some(icon))
+    .with_resizable(true)
+    .with_visible(true);
 
   let template = ConfigTemplateBuilder::new()
     .with_depth_size(configuration::GL_DEPTH_SIZE)
