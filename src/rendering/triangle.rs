@@ -28,8 +28,6 @@ pub mod gl {
   pub use Gles2 as Gl;
 }
 
-
-// Find the config with the maximum number of samples, so our triangle will be smooth.
 pub fn gl_config_picker(configs: Box<dyn Iterator<Item = Config> + '_>) -> Config {
   configs
     .reduce(|accum, config| {
@@ -72,8 +70,8 @@ impl Renderer {
         info!("[Kuplung] Shaders version on {}", shaders_version.to_string_lossy());
       }
 
-      let vertex_shader = create_shader(&gl, gl::VERTEX_SHADER, triangle::VERTEX_SHADER_SOURCE);
-      let fragment_shader = create_shader(&gl, gl::FRAGMENT_SHADER, triangle::FRAGMENT_SHADER_SOURCE);
+      let vertex_shader = create_shader(&gl, gl::VERTEX_SHADER, VERTEX_SHADER_SOURCE);
+      let fragment_shader = create_shader(&gl, gl::FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
 
       let program = gl.CreateProgram();
 
@@ -96,8 +94,8 @@ impl Renderer {
       gl.BindBuffer(gl::ARRAY_BUFFER, vbo);
       gl.BufferData(
         gl::ARRAY_BUFFER,
-        (triangle::VERTEX_DATA.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-        triangle::VERTEX_DATA.as_ptr() as *const _,
+        (VERTEX_DATA.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+        VERTEX_DATA.as_ptr() as *const _,
         gl::STATIC_DRAW,
       );
 
@@ -158,7 +156,6 @@ impl Renderer {
 
 impl Deref for Renderer {
   type Target = gl::Gl;
-
   fn deref(&self) -> &Self::Target {
     &self.gl
   }

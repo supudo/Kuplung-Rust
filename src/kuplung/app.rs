@@ -86,8 +86,8 @@ impl ApplicationHandler for App {
     let gl_display = gl_config.display();
 
     let context_attributes = ContextAttributesBuilder::new()
-      .with_profile(glutin::context::GlProfile::Core)
-      .with_context_api(glutin::context::ContextApi::OpenGl(Some(
+      .with_profile(GlProfile::Core)
+      .with_context_api(ContextApi::OpenGl(Some(
         glutin::context::Version::new(configuration::OPENGL_VERSION_MAJOR, configuration::OPENGL_VERSION_MINOR),
       )))
       .with_debug(configuration::GL_DEBUG)
