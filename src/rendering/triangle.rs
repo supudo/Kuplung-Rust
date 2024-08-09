@@ -92,31 +92,12 @@ impl Renderer {
       let mut vbo = std::mem::zeroed();
       gl.GenBuffers(1, &mut vbo);
       gl.BindBuffer(gl::ARRAY_BUFFER, vbo);
-      gl.BufferData(
-        gl::ARRAY_BUFFER,
-        (VERTEX_DATA.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-        VERTEX_DATA.as_ptr() as *const _,
-        gl::STATIC_DRAW,
-      );
+      gl.BufferData(gl::ARRAY_BUFFER, (VERTEX_DATA.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, VERTEX_DATA.as_ptr() as *const _, gl::STATIC_DRAW);
 
       let pos_attrib = gl.GetAttribLocation(program, b"position\0".as_ptr() as *const _);
       let color_attrib = gl.GetAttribLocation(program, b"color\0".as_ptr() as *const _);
-      gl.VertexAttribPointer(
-        pos_attrib as gl::types::GLuint,
-        2,
-        gl::FLOAT,
-        0,
-        5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-        std::ptr::null(),
-      );
-      gl.VertexAttribPointer(
-        color_attrib as gl::types::GLuint,
-        3,
-        gl::FLOAT,
-        0,
-        5 * std::mem::size_of::<f32>() as gl::types::GLsizei,
-        (2 * std::mem::size_of::<f32>()) as *const () as *const _,
-      );
+      gl.VertexAttribPointer(pos_attrib as gl::types::GLuint, 2, gl::FLOAT, 0, 5 * std::mem::size_of::<f32>() as gl::types::GLsizei, std::ptr::null());
+      gl.VertexAttribPointer(color_attrib as gl::types::GLuint, 3, gl::FLOAT, 0, 5 * std::mem::size_of::<f32>() as gl::types::GLsizei, (2 * std::mem::size_of::<f32>()) as *const () as *const _);
       gl.EnableVertexAttribArray(pos_attrib as gl::types::GLuint);
       gl.EnableVertexAttribArray(color_attrib as gl::types::GLuint);
 
