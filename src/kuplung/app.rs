@@ -59,11 +59,9 @@ pub fn main(event_loop: winit::event_loop::EventLoop<()>) -> Result<(), Box<dyn 
 
 impl ApplicationHandler for App {
   fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-
     let env = Env::default()
-      .filter_or("MY_LOG_LEVEL", "trace")
-      .write_style_or("MY_LOG_STYLE", "always");
-
+      .filter_or("KUPLUNG_LOG_LEVEL", "trace")
+      .write_style_or("KUPLUNG_LOG_STYLE", "always");
     env_logger::init_from_env(env);
 
     info!("[Kuplung] Initializing...");
@@ -85,8 +83,6 @@ impl ApplicationHandler for App {
       .and_then(|window| window.window_handle().ok())
       .map(|handle| handle.as_raw());
 
-    // XXX The display could be obtained from any object created by it, so we can
-    // query it from the config.
     let gl_display = gl_config.display();
 
     let context_attributes = ContextAttributesBuilder::new()
@@ -113,12 +109,8 @@ impl ApplicationHandler for App {
       .expect("[Kuplung] Failed to build surface attributes");
     let gl_surface = unsafe { gl_config.display().create_window_surface(&gl_config, &attrs).unwrap() };
 
-    // Make it current.
     let gl_context = gl_context.make_current(&gl_surface).unwrap();
 
-    // The context needs to be current for the Renderer to set up shaders and
-    // buffers. It also performs function loading, which needs a current context on
-    // WGL.
     self.renderer.get_or_insert_with(|| triangle::Renderer::new(&gl_display));
 
     if let Err(res) = gl_surface.set_swap_interval(&gl_context, SwapInterval::Wait(NonZeroU32::new(1).unwrap())) {
@@ -131,16 +123,8 @@ impl ApplicationHandler for App {
   fn window_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, _window_id: winit::window::WindowId, event: WindowEvent) {
     match event {
       WindowEvent::Resized(size) if size.width != 0 && size.height != 0 => {
-        // Some platforms like EGL require resizing GL surface to update the size
-        // Notable platforms here are Wayland and macOS, other don't require it
-        // and the function is no-op, but it's wise to resize it for portability
-        // reasons.
         if let Some(AppState { gl_context, gl_surface, window: _ }) = self.state.as_ref() {
-          gl_surface.resize(
-            gl_context,
-            NonZeroU32::new(size.width).unwrap(),
-            NonZeroU32::new(size.height).unwrap(),
-          );
+          gl_surface.resize(gl_context, NonZeroU32::new(size.width).unwrap(), NonZeroU32::new(size.height).unwrap());
           let renderer = self.renderer.as_ref().unwrap();
           renderer.resize(size.width as i32, size.height as i32);
         }
