@@ -1,7 +1,6 @@
 use std::ffi::{CStr, CString};
 use std::ops::Deref;
 
-use glutin::config::Config;
 use glutin::prelude::*;
 
 use log::info;
@@ -13,28 +12,14 @@ pub mod gl {
   pub use Gles2 as Gl;
 }
 
-pub fn gl_config_picker(configs: Box<dyn Iterator<Item = Config> + '_>) -> Config {
-  configs
-    .reduce(|accum, config| {
-      let transparency_check = config.supports_transparency().unwrap_or(false) & !accum.supports_transparency().unwrap_or(false);
-      if transparency_check || config.num_samples() > accum.num_samples() {
-        config
-      }
-      else {
-        accum
-      }
-    })
-    .unwrap()
-}
-
-pub struct Renderer {
+pub struct Triangle {
   program: gl::types::GLuint,
   vao: gl::types::GLuint,
   vbo: gl::types::GLuint,
   gl: gl::Gl,
 }
 
-impl Renderer {
+impl Triangle {
   pub fn new<D: GlDisplay>(gl_display: &D) -> Self {
     unsafe {
       let gl = gl::Gl::load_with(|symbol| {
@@ -118,14 +103,14 @@ impl Renderer {
   }
 }
 
-impl Deref for Renderer {
+impl Deref for Triangle {
   type Target = gl::Gl;
   fn deref(&self) -> &Self::Target {
     &self.gl
   }
 }
 
-impl Drop for Renderer {
+impl Drop for Triangle {
   fn drop(&mut self) {
     unsafe {
       self.gl.DeleteProgram(self.program);

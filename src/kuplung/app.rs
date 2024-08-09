@@ -2,10 +2,6 @@ use std::error::Error;
 use std::num::NonZeroU32;
 use env_logger::Env;
 use raw_window_handle::HasWindowHandle;
-use winit::application::ApplicationHandler;
-use winit::event::{KeyEvent, WindowEvent};
-use winit::keyboard::{Key, NamedKey};
-use winit::window::{Icon, Window};
 
 use glutin::config::ConfigTemplateBuilder;
 use glutin::context::{ContextApi, ContextAttributesBuilder, GlProfile, NotCurrentContext, PossiblyCurrentContext};
@@ -14,12 +10,17 @@ use glutin::prelude::*;
 use glutin::surface::{Surface, SwapInterval, WindowSurface};
 
 use glutin_winit::{DisplayBuilder, GlWindow};
-use winit::dpi::{LogicalPosition, Position};
-
-use crate::settings::configuration;
-use crate::rendering::{rendering_manager, triangle};
 
 use log::info;
+
+use winit::application::ApplicationHandler;
+use winit::dpi::{LogicalPosition, Position};
+use winit::event::{KeyEvent, WindowEvent};
+use winit::keyboard::{Key, NamedKey};
+use winit::window::{Icon, Window};
+
+use crate::settings::configuration;
+use crate::rendering::rendering_manager;
 
 fn load_icon() -> Icon {
   let data_icon = include_bytes!(concat!(env!("OUT_DIR"), "/assets/Kuplung.png")).as_ref();
@@ -63,7 +64,7 @@ impl ApplicationHandler for App {
 
     info!("[Kuplung] Initializing...");
 
-    let (mut window, gl_config) = match self.display_builder.clone().build(event_loop, self.template.clone(), triangle::gl_config_picker) {
+    let (mut window, gl_config) = match self.display_builder.clone().build(event_loop, self.template.clone(), rendering_manager::RenderingManager::gl_config_picker) {
       Ok(ok) => ok,
       Err(e) => {
         log::error!("[Kuplung] Error building the display! {}", e.to_string());
@@ -73,7 +74,7 @@ impl ApplicationHandler for App {
       },
     };
 
-    log::info!("[Kuplung] Picked a config with {} samples", gl_config.num_samples());
+    info!("[Kuplung] Picked a config with {} samples", gl_config.num_samples());
 
     let raw_window_handle = window
       .as_ref()
@@ -108,7 +109,7 @@ impl ApplicationHandler for App {
 
     let gl_context = gl_context.make_current(&gl_surface).unwrap();
 
-    self.renderer.get_or_insert_with(|| rendering_manager::initialize(gl_display));
+    self.renderer.get_or_insert_with(|| rendering_manager::RenderingManager::new(gl_display));
 
     if let Err(res) = gl_surface.set_swap_interval(&gl_context, SwapInterval::Wait(NonZeroU32::new(1).unwrap())) {
       log::error!("[Kuplung] Error setting vsync: {res:?}");
@@ -150,7 +151,7 @@ struct App {
   display_builder: DisplayBuilder,
   exit_state: Result<(), Box<dyn Error>>,
   gl_context: Option<NotCurrentContext>,
-  renderer: Option<triangle::Renderer>,
+  renderer: Option<rendering_manager::RenderingManager>,
   // NOTE: `AppState` carries the `Window`, thus it should be dropped after everything else.
   state: Option<AppState>,
 }
@@ -171,7 +172,5 @@ impl App {
 struct AppState {
   gl_context: PossiblyCurrentContext,
   gl_surface: Surface<WindowSurface>,
-  // NOTE: Window should be dropped after all resources created using its
-  // raw-window-handle.
   window: Window,
 }
