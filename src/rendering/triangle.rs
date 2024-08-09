@@ -1,25 +1,10 @@
-use std::error::Error;
 use std::ffi::{CStr, CString};
-use std::num::NonZeroU32;
 use std::ops::Deref;
-use env_logger::Env;
-use gl::types::GLfloat;
-use raw_window_handle::HasWindowHandle;
-use winit::application::ApplicationHandler;
-use winit::event::{KeyEvent, WindowEvent};
-use winit::keyboard::{Key, NamedKey};
-use winit::window::{Icon, Window};
 
-use glutin::config::{Config, ConfigTemplateBuilder};
-use glutin::context::{ContextApi, ContextAttributesBuilder, GlProfile, NotCurrentContext, PossiblyCurrentContext, Version};
-use glutin::display::GetGlDisplay;
+use glutin::config::Config;
 use glutin::prelude::*;
-use glutin::surface::{Surface, SwapInterval, WindowSurface};
 
-use glutin_winit::{DisplayBuilder, GlWindow};
 use log::info;
-use winit::dpi::{LogicalPosition, Position};
-use crate::rendering::triangle;
 use crate::settings::configuration;
 
 pub mod gl {

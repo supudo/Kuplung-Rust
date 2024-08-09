@@ -1,17 +1,14 @@
 use std::error::Error;
-use std::ffi::{CStr, CString};
 use std::num::NonZeroU32;
-use std::ops::Deref;
 use env_logger::Env;
-use gl::types::GLfloat;
 use raw_window_handle::HasWindowHandle;
 use winit::application::ApplicationHandler;
 use winit::event::{KeyEvent, WindowEvent};
 use winit::keyboard::{Key, NamedKey};
 use winit::window::{Icon, Window};
 
-use glutin::config::{Config, ConfigTemplateBuilder};
-use glutin::context::{ContextApi, ContextAttributesBuilder, GlProfile, NotCurrentContext, PossiblyCurrentContext, Version};
+use glutin::config::ConfigTemplateBuilder;
+use glutin::context::{ContextApi, ContextAttributesBuilder, GlProfile, NotCurrentContext, PossiblyCurrentContext};
 use glutin::display::GetGlDisplay;
 use glutin::prelude::*;
 use glutin::surface::{Surface, SwapInterval, WindowSurface};
@@ -22,7 +19,7 @@ use winit::dpi::{LogicalPosition, Position};
 use crate::settings::configuration;
 use crate::rendering::triangle;
 
-use log::{info, logger, warn};
+use log::info;
 
 fn load_icon() -> Icon {
   let data_icon = include_bytes!(concat!(env!("OUT_DIR"), "/assets/Kuplung.png")).as_ref();
