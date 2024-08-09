@@ -152,7 +152,6 @@ struct App {
   exit_state: Result<(), Box<dyn Error>>,
   gl_context: Option<NotCurrentContext>,
   renderer: Option<rendering_manager::RenderingManager>,
-  // NOTE: `AppState` carries the `Window`, thus it should be dropped after everything else.
   state: Option<AppState>,
 }
 

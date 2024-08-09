@@ -20,6 +20,7 @@ impl RenderingManager {
   }
 
   pub fn resize(&self, width: i32, height: i32) {
+    info!("[Kuplung] RenderingManager resize to {}x{}.", width, height);
     unsafe {
       self.triangle.Viewport(0, 0, width, height);
     }
