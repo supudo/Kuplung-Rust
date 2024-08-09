@@ -7,6 +7,11 @@ pub const WINDOW_HEIGHT: u32 = 600;
 pub const WINDOW_POSITION_X: f64 = 100.0;
 pub const WINDOW_POSITION_Y: f64 = 100.0;
 
+pub const KUPLUNG_LOG_LEVEL: &str = "KUPLUNG_LOG_LEVEL";
+pub const KUPLUNG_LOG_LEVEL_VALUE: &str = "trace";
+pub const KUPLUNG_LOG_STYLE: &str = "KUPLUNG_LOG_STYLE";
+pub const KUPLUNG_LOG_STYLE_VALUE: &str = "always";
+
 // OpenGL settings
 pub const OPENGL_VERSION_MAJOR: u8 = 4;
 pub const OPENGL_VERSION_MINOR: u8 = 1;

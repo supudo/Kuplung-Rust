@@ -17,7 +17,7 @@ use glutin_winit::{DisplayBuilder, GlWindow};
 use winit::dpi::{LogicalPosition, Position};
 
 use crate::settings::configuration;
-use crate::rendering::triangle;
+use crate::rendering::{rendering_manager, triangle};
 
 use log::info;
 
@@ -57,8 +57,8 @@ pub fn main(event_loop: winit::event_loop::EventLoop<()>) -> Result<(), Box<dyn 
 impl ApplicationHandler for App {
   fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
     let env = Env::default()
-      .filter_or("KUPLUNG_LOG_LEVEL", "trace")
-      .write_style_or("KUPLUNG_LOG_STYLE", "always");
+      .filter_or(configuration::KUPLUNG_LOG_LEVEL, configuration::KUPLUNG_LOG_LEVEL_VALUE)
+      .write_style_or(configuration::KUPLUNG_LOG_STYLE, configuration::KUPLUNG_LOG_STYLE_VALUE);
     env_logger::init_from_env(env);
 
     info!("[Kuplung] Initializing...");
@@ -108,7 +108,7 @@ impl ApplicationHandler for App {
 
     let gl_context = gl_context.make_current(&gl_surface).unwrap();
 
-    self.renderer.get_or_insert_with(|| triangle::Renderer::new(&gl_display));
+    self.renderer.get_or_insert_with(|| rendering_manager::initialize(gl_display));
 
     if let Err(res) = gl_surface.set_swap_interval(&gl_context, SwapInterval::Wait(NonZeroU32::new(1).unwrap())) {
       log::error!("[Kuplung] Error setting vsync: {res:?}");
