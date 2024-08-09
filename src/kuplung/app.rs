@@ -2,7 +2,7 @@ use std::error::Error;
 use std::ffi::{CStr, CString};
 use std::num::NonZeroU32;
 use std::ops::Deref;
-
+use env_logger::Env;
 use gl::types::GLfloat;
 use raw_window_handle::HasWindowHandle;
 use winit::application::ApplicationHandler;
@@ -11,16 +11,18 @@ use winit::keyboard::{Key, NamedKey};
 use winit::window::{Icon, Window};
 
 use glutin::config::{Config, ConfigTemplateBuilder};
-use glutin::context::{
-  ContextApi, ContextAttributesBuilder, NotCurrentContext, PossiblyCurrentContext, Version,
-};
+use glutin::context::{ContextApi, ContextAttributesBuilder, GlProfile, NotCurrentContext, PossiblyCurrentContext, Version};
 use glutin::display::GetGlDisplay;
 use glutin::prelude::*;
 use glutin::surface::{Surface, SwapInterval, WindowSurface};
 
 use glutin_winit::{DisplayBuilder, GlWindow};
 use winit::dpi::{LogicalPosition, Position};
+
 use crate::settings::configuration;
+use crate::rendering::triangle;
+
+use log::{info, logger, warn};
 
 pub mod gl {
   #![allow(clippy::all)]
@@ -49,15 +51,12 @@ pub fn main(event_loop: winit::event_loop::EventLoop<()>) -> Result<(), Box<dyn 
     .with_inner_size(winit::dpi::LogicalSize::new(configuration::WINDOW_WIDTH, configuration::WINDOW_HEIGHT))
     .with_window_icon(Some(icon));
 
-  // The template will match only the configurations supporting rendering
-  // to windows.
-  //
-  // XXX We force transparency only on macOS, given that EGL on X11 doesn't
-  // have it, but we still want to show window. The macOS situation is like
-  // that, because we can query only one config at a time on it, but all
-  // normal platforms will return multiple configs, so we can find the config
-  // with transparency ourselves inside the `reduce`.
-  let template = ConfigTemplateBuilder::new().with_alpha_size(8);
+  let template = ConfigTemplateBuilder::new()
+    .with_depth_size(configuration::GL_DEPTH_SIZE)
+    .with_multisampling(configuration::GL_MULTISAMPLING)
+    .with_stencil_size(configuration::GL_STENCIL_SIZE)
+    .with_single_buffering(configuration::GL_DOUBLE_BUFFERING)
+    .prefer_hardware_accelerated(Some(configuration::GL_HARDWARE_ACCELERATED));
   let display_builder = DisplayBuilder::new().with_window_attributes(Some(window_attributes));
   let mut app = App::new(template, display_builder);
   event_loop.run_app(&mut app)?;
@@ -66,20 +65,26 @@ pub fn main(event_loop: winit::event_loop::EventLoop<()>) -> Result<(), Box<dyn 
 
 impl ApplicationHandler for App {
   fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-    let (mut window, gl_config) = match self.display_builder.clone().build(
-      event_loop,
-      self.template.clone(),
-      gl_config_picker,
-    ) {
+
+    let env = Env::default()
+      .filter_or("MY_LOG_LEVEL", "trace")
+      .write_style_or("MY_LOG_STYLE", "always");
+
+    env_logger::init_from_env(env);
+
+    info!("[Kuplung] Initializing...");
+
+    let (mut window, gl_config) = match self.display_builder.clone().build(event_loop, self.template.clone(), gl_config_picker) {
       Ok(ok) => ok,
       Err(e) => {
+        log::error!("[Kuplung] Error building the display! {}", e.to_string());
         self.exit_state = Err(e);
         event_loop.exit();
         return;
       },
     };
 
-    println!("Picked a config with {} samples", gl_config.num_samples());
+    log::info!("[Kuplung] Picked a config with {} samples", gl_config.num_samples());
 
     let raw_window_handle = window
       .as_ref()
@@ -90,76 +95,43 @@ impl ApplicationHandler for App {
     // query it from the config.
     let gl_display = gl_config.display();
 
-    // The context creation part.
-    let context_attributes = ContextAttributesBuilder::new().build(raw_window_handle);
-
-    // Since glutin by default tries to create OpenGL core context, which may not be
-    // present we should try gles.
-    let fallback_context_attributes = ContextAttributesBuilder::new()
-      .with_context_api(ContextApi::Gles(None))
+    let context_attributes = ContextAttributesBuilder::new()
+      .with_profile(glutin::context::GlProfile::Core)
+      .with_context_api(glutin::context::ContextApi::OpenGl(Some(
+        glutin::context::Version::new(configuration::OPENGL_VERSION_MAJOR, configuration::OPENGL_VERSION_MINOR),
+      )))
+      .with_debug(configuration::GL_DEBUG)
       .build(raw_window_handle);
 
-    // There are also some old devices that support neither modern OpenGL nor GLES.
-    // To support these we can try and create a 2.1 context.
-    let legacy_context_attributes = ContextAttributesBuilder::new()
-      .with_context_api(ContextApi::OpenGl(Some(Version::new(2, 1))))
-      .build(raw_window_handle);
-
-    // Reuse the uncurrented context from a suspended() call if it exists, otherwise
-    // this is the first time resumed() is called, where the context still
-    // has to be created.
-    let not_current_gl_context = self.not_current_gl_context.take().unwrap_or_else(|| unsafe {
-      gl_display.create_context(&gl_config, &context_attributes).unwrap_or_else(|_| {
-        gl_display.create_context(&gl_config, &fallback_context_attributes).unwrap_or_else(
-          |_| {
-            gl_display
-              .create_context(&gl_config, &legacy_context_attributes)
-              .expect("failed to create context")
-          },
-        )
-      })
+    let gl_context = self.gl_context.take().unwrap_or_else(|| unsafe {
+      gl_display.create_context(&gl_config, &context_attributes).unwrap()
     });
 
     let window = window.take().unwrap_or_else(|| {
       let window_attributes = Window::default_attributes()
         .with_transparent(true)
-        .with_title("Glutin triangle gradient example (press Escape to exit)");
+        .with_title(configuration::APP_TITLE);
       glutin_winit::finalize_window(event_loop, window_attributes, &gl_config).unwrap()
     });
 
     let attrs = window
       .build_surface_attributes(Default::default())
-      .expect("Failed to build surface attributes");
+      .expect("[Kuplung] Failed to build surface attributes");
     let gl_surface = unsafe { gl_config.display().create_window_surface(&gl_config, &attrs).unwrap() };
 
     // Make it current.
-    let gl_context = not_current_gl_context.make_current(&gl_surface).unwrap();
+    let gl_context = gl_context.make_current(&gl_surface).unwrap();
 
     // The context needs to be current for the Renderer to set up shaders and
     // buffers. It also performs function loading, which needs a current context on
     // WGL.
     self.renderer.get_or_insert_with(|| Renderer::new(&gl_display));
 
-    // Try setting vsync.
     if let Err(res) = gl_surface.set_swap_interval(&gl_context, SwapInterval::Wait(NonZeroU32::new(1).unwrap())) {
-      eprintln!("Error setting vsync: {res:?}");
+      log::error!("[Kuplung] Error setting vsync: {res:?}");
     }
 
     assert!(self.state.replace(AppState { gl_context, gl_surface, window }).is_none());
-  }
-
-  fn suspended(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
-    // This event is only raised on Android, where the backing NativeWindow for a GL
-    // Surface can appear and disappear at any moment.
-    println!("Android window removed");
-
-    // Destroy the GL Surface and un-current the GL Context before ndk-glue releases
-    // the window back to the system.
-    let gl_context = self.state.take().unwrap().gl_context;
-    assert!(self
-      .not_current_gl_context
-      .replace(gl_context.make_not_current().unwrap())
-      .is_none());
   }
 
   fn window_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, _window_id: winit::window::WindowId, event: WindowEvent) {
@@ -202,7 +174,7 @@ struct App {
   template: ConfigTemplateBuilder,
   display_builder: DisplayBuilder,
   exit_state: Result<(), Box<dyn Error>>,
-  not_current_gl_context: Option<NotCurrentContext>,
+  gl_context: Option<NotCurrentContext>,
   renderer: Option<Renderer>,
   // NOTE: `AppState` carries the `Window`, thus it should be dropped after everything else.
   state: Option<AppState>,
@@ -214,7 +186,7 @@ impl App {
       template,
       display_builder,
       exit_state: Ok(()),
-      not_current_gl_context: None,
+      gl_context: None,
       state: None,
       renderer: None,
     }
@@ -262,18 +234,18 @@ impl Renderer {
       });
 
       if let Some(renderer) = get_gl_string(&gl, gl::RENDERER) {
-        println!("Running on {}", renderer.to_string_lossy());
+        info!("[Kuplung] Running on {}", renderer.to_string_lossy());
       }
       if let Some(version) = get_gl_string(&gl, gl::VERSION) {
-        println!("OpenGL Version {}", version.to_string_lossy());
+        info!("[Kuplung] OpenGL Version {}", version.to_string_lossy());
       }
 
       if let Some(shaders_version) = get_gl_string(&gl, gl::SHADING_LANGUAGE_VERSION) {
-        println!("Shaders version on {}", shaders_version.to_string_lossy());
+        info!("[Kuplung] Shaders version on {}", shaders_version.to_string_lossy());
       }
 
-      let vertex_shader = create_shader(&gl, gl::VERTEX_SHADER, VERTEX_SHADER_SOURCE);
-      let fragment_shader = create_shader(&gl, gl::FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
+      let vertex_shader = create_shader(&gl, gl::VERTEX_SHADER, triangle::VERTEX_SHADER_SOURCE);
+      let fragment_shader = create_shader(&gl, gl::FRAGMENT_SHADER, triangle::FRAGMENT_SHADER_SOURCE);
 
       let program = gl.CreateProgram();
 
@@ -296,8 +268,8 @@ impl Renderer {
       gl.BindBuffer(gl::ARRAY_BUFFER, vbo);
       gl.BufferData(
         gl::ARRAY_BUFFER,
-        (VERTEX_DATA.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
-        VERTEX_DATA.as_ptr() as *const _,
+        (triangle::VERTEX_DATA.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr,
+        triangle::VERTEX_DATA.as_ptr() as *const _,
         gl::STATIC_DRAW,
       );
 
@@ -327,7 +299,7 @@ impl Renderer {
   }
 
   pub fn draw(&self) {
-    self.draw_with_clear_color(0.1, 0.1, 0.1, 0.9)
+    self.draw_with_clear_color(configuration::GL_CLEAR_COLOR_R, configuration::GL_CLEAR_COLOR_G, configuration::GL_CLEAR_COLOR_B, configuration::GL_CLEAR_COLOR_A)
   }
 
   pub fn draw_with_clear_color(
@@ -388,35 +360,3 @@ fn get_gl_string(gl: &gl::Gl, variant: gl::types::GLenum) -> Option<&'static CSt
   }
 }
 
-#[rustfmt::skip]
-static VERTEX_DATA: [f32; 15] = [
-  -0.5, -0.5,  1.0,  0.0,  0.0,
-   0.0,  0.5,  0.0,  1.0,  0.0,
-   0.5, -0.5,  0.0,  0.0,  1.0,
-];
-
-const VERTEX_SHADER_SOURCE: &[u8] = b"
-#version 100
-precision mediump float;
-
-attribute vec2 position;
-attribute vec3 color;
-
-varying vec3 v_color;
-
-void main() {
-    gl_Position = vec4(position, 0.0, 1.0);
-    v_color = color;
-}
-\0";
-
-const FRAGMENT_SHADER_SOURCE: &[u8] = b"
-#version 100
-precision mediump float;
-
-varying vec3 v_color;
-
-void main() {
-    gl_FragColor = vec4(v_color, 1.0);
-}
-\0";
