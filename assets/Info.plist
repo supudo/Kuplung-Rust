@@ -5,13 +5,13 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>Kuplung-Go</string>
+    <string>Kuplung-Rust</string>
     <key>CFBundleIdentifier</key>
-    <string>net.supudo.apps.Kuplung-Go</string>
+    <string>net.supudo.apps.Kuplung-Rust</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>Kuplung-Go</string>
+    <string>Kuplung-Rust</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

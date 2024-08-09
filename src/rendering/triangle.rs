@@ -46,6 +46,7 @@ impl Triangle {
         info!("[Kuplung] Shaders version on {}", shaders_version.to_string_lossy());
       }
 
+      let current_dir = env::current_dir().unwrap().display();
       let vertex_shader = create_shader(&gl, gl::VERTEX_SHADER, "assets/shaders/triangle.vert");
       let fragment_shader = create_shader(&gl, gl::FRAGMENT_SHADER, "assets/shaders/triangle.frag");
 

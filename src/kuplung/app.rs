@@ -15,8 +15,8 @@ use glutin::surface::{Surface, SwapInterval, WindowSurface};
 
 use glutin_winit::{DisplayBuilder, GlWindow};
 
-use imgui_winit_glow_renderer_viewports::Renderer;
-use imgui_winit_support::winit::window::WindowBuilder;
+/*use imgui_winit_glow_renderer_viewports::Renderer;
+use imgui_winit_support::winit::window::WindowBuilder;*/
 use log::info;
 
 use winit::application::ApplicationHandler;
@@ -105,12 +105,12 @@ impl ApplicationHandler for App {
       gl_display.create_context(&gl_config, &context_attributes).unwrap()
     });
 
-    let (window, gl_config) = DisplayBuilder::new()
+    /*let (window, gl_config) = DisplayBuilder::new()
       .with_window_builder(Some(window_builder))
       .build(&event_loop, self.template.b, |mut configs| {
         configs.next().unwrap()
       })
-      .expect("Failed to create main window");
+      .expect("Failed to create main window");*/
 
     let window = window.take().unwrap_or_else(|| {
       let window_attributes = Window::default_attributes()
@@ -142,8 +142,8 @@ impl ApplicationHandler for App {
     self.ui_manager.get_or_insert_with(|| ui_manager::UIManager::new());
     ui_manager::UIManager::configure_context(self.ui_manager.as_mut().unwrap(), &window);
 
-    let mut glow_renderer = Renderer::new(&mut self.ui_manager.as_mut().unwrap().imgui_context, &window, &glow)
-      .expect("[Kuplung] Failed to init Renderer!");
+    /*let mut glow_renderer = Renderer::new(&mut self.ui_manager.as_mut().unwrap().imgui_context, &window, &glow)
+      .expect("[Kuplung] Failed to init Renderer!");*/
 
     assert!(self.state.replace(AppState { gl_context, gl_surface, window }).is_none());
   }
