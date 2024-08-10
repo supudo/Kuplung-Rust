@@ -59,7 +59,7 @@ fn setup_internals() {
   let mut res = winres::WindowsResource::new();
   res.set_icon("assets/Kuplung.ico");
   res.set("InternalName", "Kuplung.exe");
-  res.compile()?;
+  res.compile().expect("Cannot setup internals during build.");
 }
 
 #[cfg(target_os = "macos")]
