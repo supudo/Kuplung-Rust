@@ -21,8 +21,11 @@ use winit::event_loop::ActiveEventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::{Icon, Window};
 
+use crate::imgui_renderer::renderers;
+use crate::kuplung::utils;
 use crate::rendering::rendering_manager;
 use crate::settings::configuration;
+use crate::ui;
 use crate::ui::ui_manager;
 
 fn load_icon() -> Icon {
@@ -122,6 +125,9 @@ impl ApplicationHandler for App {
 
     self.ui_manager.get_or_insert_with(|| ui_manager::UIManager::new());
     ui_manager::UIManager::configure_context(self.ui_manager.as_mut().unwrap(), &window);
+
+    let gl = utils::glow_context(&gl_context);
+    let mut ig_renderer = renderers::AutoRenderer::initialize(gl, &mut self.ui_manager.as_mut().unwrap().imgui_context).expect("[Kuplung] UI failed to create renderer!");
 
     assert!(self.state.replace(AppState { gl_context, gl_surface, window }).is_none());
   }
