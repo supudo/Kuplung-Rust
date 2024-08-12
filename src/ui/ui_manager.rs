@@ -23,7 +23,7 @@ impl UIManager {
   }
 
   pub fn render_ui(&mut self) {
-    //let ui = self.imgui_context.frame();
-    //ui.show_demo_window(&mut true);
+    let ui = self.imgui_context.frame();
+    ui.show_demo_window(&mut true);
   }
 }
