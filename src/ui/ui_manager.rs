@@ -27,7 +27,7 @@ impl UIManager {
     self.imgui_context.io_mut().config_flags.insert(ConfigFlags::VIEWPORTS_ENABLE);
 
     let mut winit_platform = WinitPlatform::init(&mut self.imgui_context);
-    //winit_platform.attach_window(self.imgui_context.io_mut(), window, imgui_winit_support::HiDpiMode::Rounded);
+    winit_platform.attach_window(self.imgui_context.io_mut(), window, imgui_winit_support::HiDpiMode::Rounded);
 
     self.imgui_context.fonts().add_font(&[imgui::FontSource::DefaultFontData { config: None }]);
     self.imgui_context.io_mut().font_global_scale = (1.0 / winit_platform.hidpi_factor()) as f32;

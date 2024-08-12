@@ -21,7 +21,7 @@ use winit::event_loop::ActiveEventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::{Icon, Window};
 
-use crate::imgui_renderer::renderers;
+use crate::ui::imgui_renderer::renderers;
 use crate::kuplung::utils;
 use crate::rendering::rendering_manager;
 use crate::settings::configuration;

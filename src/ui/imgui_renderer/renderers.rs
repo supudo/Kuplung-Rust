@@ -49,7 +49,7 @@ use std::{borrow::Cow, error::Error, fmt::Display, mem::size_of, num::NonZeroU32
 
 use imgui::{internal::RawWrapper, DrawCmd, DrawData, DrawVert};
 
-use crate::imgui_renderer::versions::{GlVersion, GlslVersion};
+use crate::ui::imgui_renderer::versions::{GlVersion, GlslVersion};
 
 // Re-export glow to make it easier for users to use the correct version.
 pub use glow;
