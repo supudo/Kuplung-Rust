@@ -1,5 +1,4 @@
 use imgui::ConfigFlags;
-use imgui_winit_support::WinitPlatform;
 use log::info;
 use winit::window::Window;
 
@@ -21,9 +20,6 @@ impl UIManager {
     self.imgui_context.io_mut().config_flags.insert(ConfigFlags::DOCKING_ENABLE);
     self.imgui_context.io_mut().config_flags.insert(ConfigFlags::VIEWPORTS_ENABLE);
     self.imgui_context.set_ini_filename(None);
-
-    //let mut winit_platform = WinitPlatform::init(&mut self.imgui_context);
-    //winit_platform.attach_window(self.imgui_context.io_mut(), window, imgui_winit_support::HiDpiMode::Rounded);
   }
 
   pub fn render_ui(&mut self) {
