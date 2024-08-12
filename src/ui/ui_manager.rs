@@ -1,3 +1,4 @@
+use std::time::Instant;
 use glutin::context::PossiblyCurrentContext;
 use imgui::ConfigFlags;
 use imgui_winit_support::WinitPlatform;
@@ -7,6 +8,7 @@ use winit::window::Window;
 use crate::ui::imgui_renderer::renderers::AutoRenderer;
 
 pub struct UIManager {
+  last_frame: Instant,
   pub imgui_context: imgui::Context,
   renderer: Option<AutoRenderer>
 }
@@ -15,6 +17,7 @@ impl UIManager {
   pub fn new() -> Self {
     info!("[Kuplung] [UI] Initializing ImGui...");
     let this = Self {
+      last_frame: Instant::now(),
       imgui_context: imgui::Context::create(),
       renderer: None
     };
@@ -39,6 +42,12 @@ impl UIManager {
     info!("[Kuplung] [UI] ImGui context initialized.");
 
     winit_platform
+  }
+
+  pub fn render_start(&mut self) {
+    let now = Instant::now();
+    self.imgui_context.io_mut().update_delta_time(now.duration_since(self.last_frame));
+    self.last_frame = now;
   }
 
   pub fn render_ui(&mut self, window: &Window, winit_platform: &mut WinitPlatform) {

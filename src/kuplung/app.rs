@@ -1,6 +1,5 @@
 use std::error::Error;
 use std::num::NonZeroU32;
-use std::time::Instant;
 use env_logger::Env;
 use raw_window_handle::HasWindowHandle;
 
@@ -167,12 +166,9 @@ impl ApplicationHandler for App {
   }
 
   fn new_events(&mut self, _event_loop: &ActiveEventLoop, _cause: StartCause) {
-    let now = Instant::now();
-
     if !self.ui_manager.is_none() {
       let uim = self.ui_manager.as_mut().unwrap();
-      uim.imgui_context.io_mut().update_delta_time(now.duration_since(self.last_frame));
-      self.last_frame = now;
+      uim.render_start();
     }
   }
 }
@@ -185,7 +181,6 @@ struct App {
   renderer: Option<rendering_manager::RenderingManager>,
   state: Option<AppState>,
   ui_manager: Option<ui_manager::UIManager>,
-  last_frame: Instant,
   winit_platform: Option<WinitPlatform>
 }
 
@@ -199,7 +194,6 @@ impl App {
       state: None,
       renderer: None,
       ui_manager: None,
-      last_frame: Instant::now(),
       winit_platform: None
     }
   }
