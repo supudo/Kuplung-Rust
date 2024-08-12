@@ -3,6 +3,7 @@ use std::{
   fs::File,
   path::{Path, PathBuf}
 };
+#[cfg(target_os = "macos")]
 use std::process::Command;
 use gl_generator::{Api, Fallbacks, Profile, Registry, StructGenerator};
 
