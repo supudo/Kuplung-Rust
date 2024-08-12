@@ -1,7 +1,6 @@
 use glutin::{
-  context::{NotCurrentGlContext, PossiblyCurrentContext},
+  context::PossiblyCurrentContext,
   display::{GetGlDisplay, GlDisplay},
-  surface::{GlSurface},
 };
 
 pub fn glow_context(context: &PossiblyCurrentContext) -> glow::Context {

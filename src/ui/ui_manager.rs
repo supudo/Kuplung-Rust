@@ -1,27 +1,28 @@
-use glutin_winit::DisplayBuilder;
+use glutin::context::PossiblyCurrentContext;
 use imgui::ConfigFlags;
-use imgui_winit_support::winit::window::WindowBuilder;
 use imgui_winit_support::WinitPlatform;
 
 use log::info;
-use raw_window_handle::HasRawWindowHandle;
 use winit::window::Window;
+use crate::ui::imgui_renderer::renderers::AutoRenderer;
 
 pub struct UIManager {
-  pub imgui_context: imgui::Context
+  pub imgui_context: imgui::Context,
+  renderer: Option<AutoRenderer>
 }
 
 impl UIManager {
   pub fn new() -> Self {
-    info!("[Kuplung] Initializing ImGui...");
+    info!("[Kuplung] [UI] Initializing ImGui...");
     let this = Self {
-      imgui_context: imgui::Context::create()
+      imgui_context: imgui::Context::create(),
+      renderer: None
     };
-    info!("[Kuplung] ImGui initialized.");
+    info!("[Kuplung] [UI] ImGui initialized.");
     this
   }
 
-  pub fn configure_context(&mut self, window: &Window) {
+  pub fn configure_context(&mut self, window: &Window, gl_context: &PossiblyCurrentContext) -> WinitPlatform {
     self.imgui_context.set_ini_filename(None);
     self.imgui_context.io_mut().config_flags.insert(ConfigFlags::DOCKING_ENABLE);
     self.imgui_context.io_mut().config_flags.insert(ConfigFlags::VIEWPORTS_ENABLE);
@@ -32,11 +33,22 @@ impl UIManager {
     self.imgui_context.fonts().add_font(&[imgui::FontSource::DefaultFontData { config: None }]);
     self.imgui_context.io_mut().font_global_scale = (1.0 / winit_platform.hidpi_factor()) as f32;
 
-    info!("[Kuplung] ImGui context initialized.");
+    let gl = crate::kuplung::utils::glow_context(&gl_context);
+    self.renderer.get_or_insert_with(|| AutoRenderer::initialize(gl, &mut self.imgui_context).expect("[Kuplung] [UI] failed to create renderer!"));
+
+    info!("[Kuplung] [UI] ImGui context initialized.");
+
+    winit_platform
   }
 
-  pub fn render_ui(&mut self) {
-    /*let ui = self.imgui_context.frame();
-    ui.show_demo_window(&mut true);*/
+  pub fn render_ui(&mut self, window: &Window, winit_platform: &mut WinitPlatform) {
+    let ui = self.imgui_context.frame();
+    ui.show_demo_window(&mut true);
+
+    winit_platform.prepare_render(ui, &window);
+    let draw_data = self.imgui_context.render();
+
+    let i_rend = self.renderer.as_mut().unwrap();
+    i_rend.render(draw_data).expect("[Kuplung] [UI] error rendering ImGui!");
   }
 }

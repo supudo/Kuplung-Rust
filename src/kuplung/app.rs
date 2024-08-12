@@ -20,12 +20,9 @@ use winit::event::{KeyEvent, StartCause, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::{Icon, Window};
-
-use crate::ui::imgui_renderer::renderers;
-use crate::kuplung::utils;
+use imgui_winit_support::WinitPlatform;
 use crate::rendering::rendering_manager;
 use crate::settings::configuration;
-use crate::ui;
 use crate::ui::ui_manager;
 
 fn load_icon() -> Icon {
@@ -124,10 +121,7 @@ impl ApplicationHandler for App {
     }
 
     self.ui_manager.get_or_insert_with(|| ui_manager::UIManager::new());
-    ui_manager::UIManager::configure_context(self.ui_manager.as_mut().unwrap(), &window);
-
-    let gl = utils::glow_context(&gl_context);
-    let mut ig_renderer = renderers::AutoRenderer::initialize(gl, &mut self.ui_manager.as_mut().unwrap().imgui_context).expect("[Kuplung] UI failed to create renderer!");
+    self.winit_platform.get_or_insert_with(|| ui_manager::UIManager::configure_context(self.ui_manager.as_mut().unwrap(), &window, &gl_context));
 
     assert!(self.state.replace(AppState { gl_context, gl_surface, window }).is_none());
   }
@@ -135,10 +129,24 @@ impl ApplicationHandler for App {
   fn window_event(&mut self, event_loop: &ActiveEventLoop, _window_id: winit::window::WindowId, event: WindowEvent) {
     match event {
       WindowEvent::Resized(size) if size.width != 0 && size.height != 0 => {
-        if let Some(AppState { gl_context, gl_surface, window: _ }) = self.state.as_ref() {
+        if let Some(AppState { gl_context, gl_surface, window }) = self.state.as_ref() {
           gl_surface.resize(gl_context, NonZeroU32::new(size.width).unwrap(), NonZeroU32::new(size.height).unwrap());
+          // do not resize the scene with the window
+          //let renderer = self.renderer.as_ref().unwrap();
+          //renderer.resize(size.width as i32, size.height as i32);
+          let uim = self.ui_manager.as_mut().unwrap();
+          //self.winit_platform.as_ref().unwrap().handle_event(uim.imgui_context.io_mut(), &window, event);
+        }
+      },
+      WindowEvent::RedrawRequested => {
+        if let Some(AppState { gl_context, gl_surface, window }) = self.state.as_ref() {
           let renderer = self.renderer.as_ref().unwrap();
-          renderer.resize(size.width as i32, size.height as i32);
+          renderer.draw();
+
+          let uim = self.ui_manager.as_mut().unwrap();
+          uim.render_ui(window, self.winit_platform.as_mut().unwrap());
+
+          gl_surface.swap_buffers(gl_context).unwrap();
         }
       },
       WindowEvent::CloseRequested | WindowEvent::KeyboardInput {
@@ -149,16 +157,12 @@ impl ApplicationHandler for App {
     }
   }
 
-  fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
-    if let Some(AppState { gl_context, gl_surface, window }) = self.state.as_ref() {
+  fn about_to_wait(&mut self, _event_loop: &ActiveEventLoop) {
+    if let Some(AppState { gl_context: _, gl_surface: _, window }) = self.state.as_ref() {
       let uim = self.ui_manager.as_mut().unwrap();
-      uim.render_ui();
-
-      let renderer = self.renderer.as_ref().unwrap();
-      renderer.draw();
-
+      let winit_platform = self.winit_platform.as_ref().unwrap();
+      winit_platform.prepare_frame(uim.imgui_context.io_mut(), &window).unwrap();
       window.request_redraw();
-      gl_surface.swap_buffers(gl_context).unwrap();
     }
   }
 
@@ -181,7 +185,8 @@ struct App {
   renderer: Option<rendering_manager::RenderingManager>,
   state: Option<AppState>,
   ui_manager: Option<ui_manager::UIManager>,
-  last_frame: Instant
+  last_frame: Instant,
+  winit_platform: Option<WinitPlatform>
 }
 
 impl App {
@@ -195,6 +200,7 @@ impl App {
       renderer: None,
       ui_manager: None,
       last_frame: Instant::now(),
+      winit_platform: None
     }
   }
 }
