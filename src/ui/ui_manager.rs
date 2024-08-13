@@ -1,63 +1,86 @@
-use std::time::Instant;
-use glutin::context::PossiblyCurrentContext;
-use imgui::ConfigFlags;
-use imgui_winit_support::WinitPlatform;
-
 use log::info;
-use winit::window::Window;
-use crate::ui::imgui_renderer::renderers::AutoRenderer;
+use crate::ui::panel_backend;
 
+#[derive(Clone, Copy, Debug)]
+#[must_use]
+enum Command {
+  Nothing,
+  ResetEverything,
+}
+
+#[derive(Default)]
 pub struct UIManager {
-  last_frame: Instant,
-  pub imgui_context: imgui::Context,
-  renderer: Option<AutoRenderer>
+  show_backend: bool,
+  panel_backend: panel_backend::PanelBackend
 }
 
 impl UIManager {
   pub fn new() -> Self {
-    info!("[Kuplung] [UI] Initializing ImGui...");
+    info!("[Kuplung] [UI] Initializing UI...");
     let this = Self {
-      last_frame: Instant::now(),
-      imgui_context: imgui::Context::create(),
-      renderer: None
+      show_backend: false,
+      panel_backend: panel_backend::PanelBackend::default()
     };
-    info!("[Kuplung] [UI] ImGui initialized.");
+    info!("[Kuplung] [UI] UI initialized.");
     this
   }
 
-  pub fn configure_context(&mut self, window: &Window, gl_context: &PossiblyCurrentContext) -> WinitPlatform {
-    self.imgui_context.set_ini_filename(None);
-    self.imgui_context.io_mut().config_flags.insert(ConfigFlags::DOCKING_ENABLE);
-    self.imgui_context.io_mut().config_flags.insert(ConfigFlags::VIEWPORTS_ENABLE);
+  pub fn render(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    egui::CentralPanel::default().show(ctx, |ui| {
+      egui::menu::bar(ui, |ui| {
+        ui.menu_button("File", |ui| {
+          if ui.button("New").clicked() {
+          }
+          if ui.button("Open").clicked() {
+          }
+          if ui.button("Open Recent").clicked() {
+          }
+          if ui.button("Save...").clicked() {
+          }
+          ui.separator();
+          if ui.button("Quit").clicked() {
+            std::process::exit(0);
+          }
+        });
+        ui.separator();
+        ui.menu_button("Help", |ui| {
+          if ui.button("Metrics").clicked() {
+          }
+          if ui.button("Backend").clicked() {
+            self.show_backend = true;
+          }
+          if ui.button("About Kuplung").clicked() {
+          }
+        });
+      });
 
-    let mut winit_platform = WinitPlatform::init(&mut self.imgui_context);
-    winit_platform.attach_window(self.imgui_context.io_mut(), window, imgui_winit_support::HiDpiMode::Rounded);
-
-    self.imgui_context.fonts().add_font(&[imgui::FontSource::DefaultFontData { config: None }]);
-    self.imgui_context.io_mut().font_global_scale = (1.0 / winit_platform.hidpi_factor()) as f32;
-
-    let gl = crate::kuplung::utils::glow_context(&gl_context);
-    self.renderer.get_or_insert_with(|| AutoRenderer::initialize(gl, &mut self.imgui_context).expect("[Kuplung] [UI] failed to create renderer!"));
-
-    info!("[Kuplung] [UI] ImGui context initialized.");
-
-    winit_platform
+      let mut cmd = Command::Nothing;
+      self.panel_backend.update(ctx, frame);
+      //cmd = self.backend_panel(ctx, frame);
+      self.run_cmd(ctx, cmd);
+    });
   }
 
-  pub fn render_start(&mut self) {
-    let now = Instant::now();
-    self.imgui_context.io_mut().update_delta_time(now.duration_since(self.last_frame));
-    self.last_frame = now;
-  }
+  /*fn panel_show_backend(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) -> Command {
+    let mut cmd = Command::Nothing;
+    egui::SidePanel::left("backend_panel")
+      .resizable(false)
+      .show_animated(ctx, self.show_backend, |ui| {
+        ui.vertical_centered(|ui| {
+          ui.heading("💻 Backend");
+        });
 
-  pub fn render_ui(&mut self, window: &Window, winit_platform: &mut WinitPlatform) {
-    let ui = self.imgui_context.frame();
-    ui.show_demo_window(&mut true);
+        ui.separator();
+        self.backend_panel_contents(ui, frame, &mut cmd);
+      });
+  }*/
 
-    winit_platform.prepare_render(ui, &window);
-    let draw_data = self.imgui_context.render();
-
-    let i_rend = self.renderer.as_mut().unwrap();
-    i_rend.render(draw_data).expect("[Kuplung] [UI] error rendering ImGui!");
+  fn run_cmd(&mut self, ctx: &egui::Context, cmd: Command) {
+    match cmd {
+      Command::Nothing => {}
+      Command::ResetEverything => {
+        ctx.memory_mut(|mem| *mem = Default::default());
+      }
+    }
   }
 }

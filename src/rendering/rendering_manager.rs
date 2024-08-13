@@ -1,25 +1,20 @@
-use glutin::config::Config;
-use glutin::display::Display;
-use glutin::prelude::*;
 use log::info;
-use crate::rendering::triangle::Triangle;
 use crate::settings::configuration;
 
+#[derive(Default)]
 pub struct RenderingManager {
-  triangle: Triangle
 }
 
 impl RenderingManager {
-  pub fn new(gl_display: Display) -> Self {
+  pub fn new() -> Self {
     info!("[Kuplung] New RenderingManager...");
     let this = Self {
-      triangle: Triangle::new(&gl_display),
     };
     info!("[Kuplung] New RenderingManager finished.");
     this
   }
 
-  pub fn resize(&self, width: i32, height: i32) {
+  /*pub fn resize(&self, width: i32, height: i32) {
     info!("[Kuplung] RenderingManager resize to {}x{}.", width, height);
     unsafe {
       self.triangle.Viewport(0, 0, width, height);
@@ -42,5 +37,5 @@ impl RenderingManager {
         }
       })
       .unwrap()
-  }
+  }*/
 }
