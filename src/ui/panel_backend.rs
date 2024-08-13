@@ -189,9 +189,6 @@ struct EguiWindows {
   inspection: bool,
   memory: bool,
   output_events: bool,
-
-  #[cfg_attr(feature = "serde", serde(skip))]
-  output_event_history: std::collections::VecDeque<egui::output::OutputEvent>,
 }
 
 impl Default for EguiWindows {
@@ -207,7 +204,6 @@ impl EguiWindows {
       inspection: false,
       memory: false,
       output_events: false,
-      output_event_history: Default::default(),
     }
   }
 
@@ -217,7 +213,6 @@ impl EguiWindows {
       inspection,
       memory,
       output_events,
-      output_event_history: _,
     } = self;
 
     ui.checkbox(settings, "🔧 Settings");
@@ -232,17 +227,7 @@ impl EguiWindows {
       inspection,
       memory,
       output_events,
-      output_event_history,
     } = self;
-
-    ctx.output(|o| {
-      for event in &o.events {
-        output_event_history.push_back(event.clone());
-      }
-    });
-    while output_event_history.len() > 1000 {
-      output_event_history.pop_front();
-    }
 
     egui::Window::new("🔧 Settings")
       .open(settings)
@@ -277,14 +262,6 @@ impl EguiWindows {
         );
 
         ui.separator();
-
-        egui::ScrollArea::vertical()
-          .stick_to_bottom(true)
-          .show(ui, |ui| {
-            for event in output_event_history {
-              ui.label(format!("{event:?}"));
-            }
-          });
       });
   }
 }

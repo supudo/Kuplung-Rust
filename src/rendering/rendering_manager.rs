@@ -1,5 +1,4 @@
 use log::info;
-use crate::settings::configuration;
 
 #[derive(Default)]
 pub struct RenderingManager {

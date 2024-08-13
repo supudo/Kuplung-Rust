@@ -51,7 +51,7 @@ impl KuplungApp {
     // for e.g. egui::PaintCallback.
     let manager_ui = ui_manager::UIManager::new();
     let manager_rendering = rendering_manager::RenderingManager::new();
-    let mut this = Self {
+    let this = Self {
       manager_ui,
       manager_rendering
     };
