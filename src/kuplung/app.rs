@@ -49,12 +49,16 @@ impl KuplungApp {
     // Restore app state using cc.storage (requires the "persistence" feature).
     // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
     // for e.g. egui::PaintCallback.
+    // set light mode as initial theme
+    cc.egui_ctx.set_visuals(egui::Visuals::light());
+    // initialize sub-systems
     let manager_ui = ui_manager::UIManager::new();
     let manager_rendering = rendering_manager::RenderingManager::new();
     let this = Self {
       manager_ui,
       manager_rendering
     };
+    info!("[Kuplung] egui initialized.");
     this
   }
 }

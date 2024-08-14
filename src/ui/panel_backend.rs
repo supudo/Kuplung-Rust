@@ -180,11 +180,8 @@ fn integration_ui(ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
   }
 }
 
-// ----------------------------------------------------------------------------
-
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 struct EguiWindows {
-  // egui stuff:
   settings: bool,
   inspection: bool,
   memory: bool,
@@ -265,8 +262,6 @@ impl EguiWindows {
       });
   }
 }
-
-// ----------------------------------------------------------------------------
 
 #[cfg(not(target_arch = "wasm32"))]
 fn call_after_delay(delay: std::time::Duration, f: impl FnOnce() + Send + 'static) {
