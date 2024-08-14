@@ -1,11 +1,23 @@
+use std::ffi::CString;
+use std::io::Read;
 use eframe::egui_glow;
+use eframe::glow::HasContext;
 use egui_glow::glow;
 
-use log::warn;
+use log::{info, warn};
+use crate::rendering::gl_utils;
+
+#[rustfmt::skip]
+pub static VERTEX_DATA: [f32; 15] = [
+  -0.5, -0.5,  1.0,  0.0,  0.0,
+  0.0,  0.5,  0.0,  1.0,  0.0,
+  0.5, -0.5,  0.0,  0.0,  1.0,
+];
 
 pub struct Triangler {
   program: glow::Program,
   vertex_array: glow::VertexArray,
+  //vertex_buffer: glow::Buffer
 }
 
 #[allow(unsafe_code)]
@@ -21,66 +33,23 @@ impl Triangler {
         return None;
       }
 
-      let (vertex_shader_source, fragment_shader_source) = (
-        r#"
-                    const vec2 verts[3] = vec2[3](
-                        vec2(0.0, 1.0),
-                        vec2(-1.0, -1.0),
-                        vec2(1.0, -1.0)
-                    );
-                    const vec4 colors[3] = vec4[3](
-                        vec4(1.0, 0.0, 0.0, 1.0),
-                        vec4(0.0, 1.0, 0.0, 1.0),
-                        vec4(0.0, 0.0, 1.0, 1.0)
-                    );
-                    out vec4 v_color;
-                    uniform float u_angle;
-                    void main() {
-                        v_color = colors[gl_VertexID];
-                        gl_Position = vec4(verts[gl_VertexID], 0.0, 1.0);
-                        gl_Position.x *= cos(u_angle);
-                    }
-                "#,
-        r#"
-                    precision mediump float;
-                    in vec4 v_color;
-                    out vec4 out_color;
-                    void main() {
-                        out_color = v_color;
-                    }
-                "#,
-      );
-
-      let shader_sources = [
-        (glow::VERTEX_SHADER, vertex_shader_source),
-        (glow::FRAGMENT_SHADER, fragment_shader_source),
-      ];
-
-      let shaders: Vec<_> = shader_sources
-        .iter()
-        .map(|(shader_type, shader_source)| {
-          let shader = gl.create_shader(*shader_type).expect("[Kuplung] [Triangler] Cannot create shader");
-          gl.shader_source(shader, &format!("{}\n{}", shader_version.version_declaration(), shader_source));
-          gl.compile_shader(shader);
-          assert!(gl.get_shader_compile_status(shader), "[Kuplung] [Triangler] Failed to compile custom_3d_glow {shader_type}: {}", gl.get_shader_info_log(shader));
-          gl.attach_shader(program, shader);
-          shader
-        })
-        .collect();
+      let shader_vertex = gl_utils::create_shader(&program, &gl, shader_version, glow::VERTEX_SHADER, "assets/shaders/triangle.vert");
+      let shader_fragment = gl_utils::create_shader(&program, &gl, shader_version, glow::FRAGMENT_SHADER, "assets/shaders/triangle.frag");
 
       gl.link_program(program);
       assert!(gl.get_program_link_status(program), "{}", gl.get_program_info_log(program));
 
-      for shader in shaders {
-        gl.detach_shader(program, shader);
-        gl.delete_shader(shader);
-      }
+      gl.detach_shader(program, shader_vertex);
+      gl.delete_shader(shader_vertex);
+      gl.detach_shader(program, shader_fragment);
+      gl.delete_shader(shader_fragment);
 
       let vertex_array = gl.create_vertex_array().expect("[Kuplung] [Triangler] Cannot create vertex array");
 
       Some(Self {
         program,
-        vertex_array,
+        vertex_array: vertex_array,
+        //vertex_buffer: vertex_buffer
       })
     }
   }
@@ -90,6 +59,7 @@ impl Triangler {
     unsafe {
       gl.delete_program(self.program);
       gl.delete_vertex_array(self.vertex_array);
+      //gl.delete_buffer(self.vertex_buffer);
     }
   }
 
