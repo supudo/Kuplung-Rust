@@ -17,7 +17,7 @@ pub static VERTEX_DATA: [f32; 15] = [
 pub struct Triangler {
   program: glow::Program,
   vertex_array: glow::VertexArray,
-  //vertex_buffer: glow::Buffer
+  vertex_buffer: glow::Buffer
 }
 
 #[allow(unsafe_code)]
@@ -26,10 +26,10 @@ impl Triangler {
     use glow::HasContext as _;
     let shader_version = egui_glow::ShaderVersion::get(gl);
     unsafe {
-      let program = gl.create_program().expect("[Kuplung] [Triangler] Cannot create program");
+      let program = gl.create_program().expect("[Kuplung] [Triangler] Cannot create program!");
 
       if !shader_version.is_new_shader_interface() {
-        warn!("[Kuplung] [Triangler] Custom 3D painting hasn't been ported to {:?}", shader_version);
+        warn!("[Kuplung] [Triangler]Triangler hasn't been tested on {:?}.", shader_version);
         return None;
       }
 
@@ -44,12 +44,26 @@ impl Triangler {
       gl.detach_shader(program, shader_fragment);
       gl.delete_shader(shader_fragment);
 
-      let vertex_array = gl.create_vertex_array().expect("[Kuplung] [Triangler] Cannot create vertex array");
+      let vertex_buffer = gl.create_buffer().expect("[Kuplung] [Triangler] Cannot create vertex buffer!");
+      gl.bind_buffer(glow::ARRAY_BUFFER, Some(vertex_buffer));
+      gl.buffer_data_u8_slice(glow::ARRAY_BUFFER,  core::slice::from_raw_parts(VERTEX_DATA.as_ptr() as *const u8, VERTEX_DATA.len() * size_of::<f32>()), glow::STATIC_DRAW);
+
+      let vertex_array = gl.create_vertex_array().expect("[Kuplung] [Triangler] Cannot create vertex array!");
+      gl.bind_vertex_array(Some(vertex_array));
+      gl.enable_vertex_attrib_array(0);
+      gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
+
+      /*let pos_attrib = gl.get_attrib_location(program, b"position\0".as_ptr() as *const _);
+      let color_attrib = gl.get_attrib_location(program, b"color\0".as_ptr() as *const _);
+      gl.vertex_attrib_pointer_f32(pos_attrib as gl::types::GLuint, 2, gl::FLOAT, 0, 5 * std::mem::size_of::<f32>() as gl::types::GLsizei, std::ptr::null());
+      gl.vertex_attrib_pointer_f32(color_attrib as gl::types::GLuint, 3, gl::FLOAT, 0, 5 * std::mem::size_of::<f32>() as gl::types::GLsizei, (2 * std::mem::size_of::<f32>()) as *const () as *const _);
+      gl.enable_vertex_attrib_array(pos_attrib as gl::types::GLuint);
+      gl.enable_vertex_attrib_array(color_attrib as gl::types::GLuint);*/
 
       Some(Self {
         program,
         vertex_array: vertex_array,
-        //vertex_buffer: vertex_buffer
+        vertex_buffer: vertex_buffer
       })
     }
   }
@@ -59,7 +73,7 @@ impl Triangler {
     unsafe {
       gl.delete_program(self.program);
       gl.delete_vertex_array(self.vertex_array);
-      //gl.delete_buffer(self.vertex_buffer);
+      gl.delete_buffer(self.vertex_buffer);
     }
   }
 
