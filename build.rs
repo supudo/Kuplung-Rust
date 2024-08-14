@@ -5,17 +5,12 @@ use std::{
 };
 #[cfg(target_os = "macos")]
 use std::process::Command;
-use gl_generator::{Api, Fallbacks, Profile, Registry, StructGenerator};
 
 const ASSETS_DIR: &'static str = "assets";
 
 fn main()-> io::Result<()> {
   let dest = PathBuf::from(&env::var("OUT_DIR").unwrap());
   println!("cargo:rerun-if-changed=build.rs");
-  let mut file = File::create(dest.join("gl_bindings.rs")).unwrap();
-  Registry::new(Api::Gles2, (3, 0), Profile::Core, Fallbacks::All, [])
-    .write_bindings(StructGenerator, &mut file)
-    .unwrap();
 
   // copy the assets folder
   let assets_folder = env::var("OUT_DIR").unwrap();
