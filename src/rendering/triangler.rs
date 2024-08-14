@@ -6,12 +6,13 @@ use egui_glow::glow;
 
 use log::{info, warn};
 use crate::rendering::gl_utils;
+use crate::settings::configuration;
 
 #[rustfmt::skip]
 pub static VERTEX_DATA: [f32; 15] = [
-  -0.5, -0.5,  1.0,  0.0,  0.0,
-  0.0,  0.5,  0.0,  1.0,  0.0,
-  0.5, -0.5,  0.0,  0.0,  1.0,
+    0.0,  1.0,  1.0,  0.0,  0.0,
+   -1.0, -1.0,  0.0,  1.0,  0.0,
+    1.0, -1.0,  0.0,  0.0,  1.0,
 ];
 
 pub struct Triangler {
@@ -50,15 +51,14 @@ impl Triangler {
 
       let vertex_array = gl.create_vertex_array().expect("[Kuplung] [Triangler] Cannot create vertex array!");
       gl.bind_vertex_array(Some(vertex_array));
-      gl.enable_vertex_attrib_array(0);
-      gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
 
-      /*let pos_attrib = gl.get_attrib_location(program, b"position\0".as_ptr() as *const _);
-      let color_attrib = gl.get_attrib_location(program, b"color\0".as_ptr() as *const _);
-      gl.vertex_attrib_pointer_f32(pos_attrib as gl::types::GLuint, 2, gl::FLOAT, 0, 5 * std::mem::size_of::<f32>() as gl::types::GLsizei, std::ptr::null());
-      gl.vertex_attrib_pointer_f32(color_attrib as gl::types::GLuint, 3, gl::FLOAT, 0, 5 * std::mem::size_of::<f32>() as gl::types::GLsizei, (2 * std::mem::size_of::<f32>()) as *const () as *const _);
-      gl.enable_vertex_attrib_array(pos_attrib as gl::types::GLuint);
-      gl.enable_vertex_attrib_array(color_attrib as gl::types::GLuint);*/
+      let attrib_position = gl.get_attrib_location(program, "position");
+      gl.vertex_attrib_pointer_f32(attrib_position.unwrap(), 2, glow::FLOAT, false, 8, 0);
+      gl.enable_vertex_attrib_array(attrib_position.unwrap());
+
+      let attrib_color = gl.get_attrib_location(program, "color");
+      gl.vertex_attrib_pointer_f32(attrib_color.unwrap(), 3, glow::FLOAT, false, 8, 0);
+      gl.enable_vertex_attrib_array(attrib_color.unwrap());
 
       Some(Self {
         program,
@@ -78,11 +78,16 @@ impl Triangler {
   }
 
   pub fn paint(&self, gl: &glow::Context, angle: f32) {
-    use glow::HasContext as _;
     unsafe {
       gl.use_program(Some(self.program));
-      gl.uniform_1_f32(gl.get_uniform_location(self.program, "u_angle").as_ref(), angle);
       gl.bind_vertex_array(Some(self.vertex_array));
+      gl.bind_buffer(glow::ARRAY_BUFFER, Some(self.vertex_buffer));
+
+      gl.uniform_1_f32(gl.get_uniform_location(self.program, "u_angle").as_ref(), angle);
+      /*gl.uniform_1_f32(gl.get_uniform_location(self.program, "position").as_ref(), angle);
+      gl.uniform_1_f32(gl.get_uniform_location(self.program, "color").as_ref(), angle);*/
+
+      gl.clear_color(configuration::GL_CLEAR_COLOR_R, configuration::GL_CLEAR_COLOR_G, configuration::GL_CLEAR_COLOR_B, configuration::GL_CLEAR_COLOR_A);
       gl.draw_arrays(glow::TRIANGLES, 0, 3);
     }
   }
