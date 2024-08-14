@@ -45,7 +45,7 @@ impl UIManager {
       egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
           // main menu
-          self.show_main_menu(ctx, ui);
+          self.show_main_menu(ui);
         });
       });
 
@@ -62,7 +62,7 @@ impl UIManager {
     }
   }
 
-  fn show_main_menu(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+  fn show_main_menu(&mut self, ui: &mut Ui) {
     // shortcuts
     let shortcut_quit = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::Escape);
     let shortcut_new = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::N);
@@ -100,7 +100,7 @@ impl UIManager {
         }
       });
       ui.separator();
-      self.show_theme(ctx, ui);
+      self.show_theme(ui);
     });
   }
 
@@ -118,7 +118,7 @@ impl UIManager {
     cmd
   }
 
-  fn panel_contents_backend(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame, cmd: &mut Command) {
+  fn panel_contents_backend(&mut self, ui: &mut Ui, frame: &mut eframe::Frame, cmd: &mut Command) {
     self.panel_backend.ui(ui, frame);
     ui.separator();
     ui.horizontal(|ui| {
@@ -133,7 +133,7 @@ impl UIManager {
     });
   }
 
-  fn show_theme(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+  fn show_theme(&mut self, ui: &mut Ui) {
     #![allow(clippy::collapsible_else_if)]
     if self.dark_mode {
       if ui.button("☀").on_hover_text("Switch to light mode").clicked() {

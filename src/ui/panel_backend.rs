@@ -121,7 +121,6 @@ fn integration_ui(ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
     ui.label(".");
   });
 
-  #[cfg(feature = "glow")]
   if _frame.gl().is_some() {
     ui.horizontal(|ui| {
       ui.label("Renderer:");
@@ -177,7 +176,6 @@ fn integration_ui(ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
   }
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 struct EguiWindows {
   settings: bool,
   inspection: bool,
