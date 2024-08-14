@@ -32,7 +32,7 @@ impl UIManager {
     egui::CentralPanel::default().show(ctx, |ui| {
       let mut cmd = Command::Nothing;
 
-      egui::SidePanel::right("egui_demo_panel")
+      egui::SidePanel::right("panel_backend")
         .resizable(false)
         .default_width(150.0)
         .show(ctx, |ui| {

@@ -1,4 +1,3 @@
-/// How often we repaint the demo app by default
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum RunMode {
   Reactive,
@@ -88,8 +87,6 @@ impl PanelBackend {
     } else {
       ui.label("Only running UI code when there are animations or input.");
 
-      // Add a test for `request_repaint_after`, but only in debug
-      // builds to keep the noise down in the official demo.
       if cfg!(debug_assertions) {
         ui.collapsing("More…", |ui| {
           ui.horizontal(|ui| {
