@@ -1,4 +1,4 @@
-use eframe::{HardwareAcceleration, Renderer, Theme};
+use eframe::{glow, HardwareAcceleration, Renderer, Theme};
 use eframe::egui_glow::ShaderVersion;
 use egui::ViewportBuilder;
 use log::info;
@@ -39,7 +39,7 @@ pub fn main() -> eframe::Result {
 
 #[derive(Default)]
 struct KuplungApp {
-  manager_rendering: rendering_manager::RenderingManager,
+  manager_rendering: Option<rendering_manager::RenderingManager>,
   manager_ui: ui_manager::UIManager,
 }
 
@@ -50,7 +50,7 @@ impl KuplungApp {
 
     // initialize sub-systems
     let manager_ui = ui_manager::UIManager::new();
-    let manager_rendering = rendering_manager::RenderingManager::new();
+    let manager_rendering = rendering_manager::RenderingManager::new(cc);
     let this = Self {
       manager_ui,
       manager_rendering
@@ -64,5 +64,12 @@ impl KuplungApp {
 impl eframe::App for KuplungApp {
   fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
     self.manager_ui.render(ctx, frame);
+    self.manager_rendering.as_mut().unwrap().update(ctx, frame);
+  }
+
+  fn on_exit(&mut self, gl: Option<&glow::Context>) {
+    if let Some(manager_rendering) = &mut self.manager_rendering {
+      manager_rendering.on_exit(gl);
+    }
   }
 }

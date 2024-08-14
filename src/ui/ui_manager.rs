@@ -32,15 +32,10 @@ impl UIManager {
     egui::CentralPanel::default().show(ctx, |ui| {
       let mut cmd = Command::Nothing;
 
-      egui::SidePanel::right("panel_backend")
-        .resizable(false)
-        .default_width(150.0)
-        .show(ctx, |ui| {
-          // egui backend panel
-          self.panel_backend.update(ctx, frame);
-          cmd = self.panel_backend_show(ctx, frame);
-          self.panel_backend.end_of_frame(ctx);
-        });
+      // egui backend panel
+      self.panel_backend.update(ctx, frame);
+      cmd = self.panel_backend_show(ctx, frame);
+      self.panel_backend.end_of_frame(ctx);
 
       egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
@@ -66,9 +61,11 @@ impl UIManager {
     // shortcuts
     let shortcut_quit = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::Escape);
     let shortcut_new = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::N);
+    let shortcut_backend = egui::KeyboardShortcut::new(Modifiers::SHIFT | Modifiers::CTRL | Modifiers::ALT, egui::Key::B);
 
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { std::process::exit(0); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { todo!() }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_backend)) { self.toggle_backend(ui); }
 
     // main menu
     egui::menu::bar(ui, |ui| {
@@ -92,10 +89,7 @@ impl UIManager {
       ui.menu_button("Help", |ui| {
         if ui.button("Metrics").on_hover_text("Show scene stats").clicked() {
         }
-        if ui.button("Backend").on_hover_text("View egui backend").clicked() {
-          self.show_backend = !self.show_backend;
-          ui.close_menu();
-        }
+        if ui.add(egui::Button::new("Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
         if ui.button("About Kuplung").clicked() {
         }
       });
@@ -147,5 +141,10 @@ impl UIManager {
         ui.ctx().set_visuals(egui::Visuals::dark());
       }
     }
+  }
+
+  fn toggle_backend(&mut self, ui: &mut Ui) {
+    self.show_backend = !self.show_backend;
+    ui.close_menu();
   }
 }
