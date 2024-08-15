@@ -4,10 +4,6 @@
 
 Rust port of [Kuplung](https://github.com/supudo/kuplung)
 
-### Using/Including
-
-- [Dear ImGui Rust bindings by imgui-rs](https://github.com/Gekkio/imgui-rs)
-
 ### License
 
 Each library uses comes with its own license. The core of the application is public domain or whatever fits them all.
