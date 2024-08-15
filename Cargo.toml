@@ -9,15 +9,15 @@ keywords = ["OpenGL", "graphics", "rendering"]
 build = "build.rs"
 
 [dependencies]
-gl = "*"
-winit = "0.30.4"
-glutin = "0.32.0"
-glutin-winit = "0.5.0"
-raw-window-handle = "0.6.2"
 image = "0.25.2"
+eframe = { version = "0.28.1", default-features = false, features = [
+    "default_fonts", # Embed the default egui fonts.
+    "glow",          # Use the glow rendering backend. Alternative: "wgpu".
+] }
+egui = "0.28.1"
+log = "0.4.22"
+env_logger = "0.11.5"
+clipboard = "0.5.0"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"
-
-[build-dependencies]
-gl_generator = "0.14"
