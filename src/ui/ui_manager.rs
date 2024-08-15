@@ -1,8 +1,7 @@
-use egui::{Context, Modifiers, TextEdit, Ui};
+use egui::{Context, Modifiers, Ui};
 use log::info;
-use crate::settings::configuration;
 use crate::ui::dialogs::options;
-use crate::ui::{components, panel_backend};
+use crate::ui::panel_backend;
 use crate::ui::components::log::ComponentLog;
 
 #[derive(Clone, Copy, Debug)]
@@ -40,7 +39,7 @@ impl UIManager {
   }
 
   pub fn render(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-    egui::CentralPanel::default().show(ctx, |ui| {
+    egui::CentralPanel::default().show(ctx, |_| {
       let mut cmd = Command::Nothing;
 
       // main menu
@@ -52,13 +51,13 @@ impl UIManager {
       });
 
       // egui backend panel
-      self.panel_backend.update(ctx, frame);
+      self.panel_backend.update(ctx);
       cmd = self.panel_backend_show(ctx, frame);
       self.panel_backend.end_of_frame(ctx);
 
-      if (self.show_options) { self.render_options(ctx); }
-      if (self.show_component_log) { self.render_component_log(ctx); }
-      if (self.show_about) { self.render_about(ctx); }
+      if self.show_options { self.render_options(ctx); }
+      if self.show_component_log { self.render_component_log(ctx); }
+      if self.show_about { self.render_about(ctx); }
 
       self.run_cmd(ctx, cmd);
     });
@@ -84,38 +83,40 @@ impl UIManager {
     let shortcut_open = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::O);
     let shortcut_save = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::S);
     let shortcut_backend = egui::KeyboardShortcut::new(Modifiers::SHIFT | Modifiers::CTRL | Modifiers::ALT, egui::Key::B);
+    let shortcut_about = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::F1);
 
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { std::process::exit(0); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { self.toggle_dialog_new(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_open)) { self.toggle_dialog_open(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_save)) { self.toggle_dialog_save(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_backend)) { self.toggle_backend(ui); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_about)) { self.toggle_about(ui); }
 
     // main menu
     egui::menu::bar(ui, |ui| {
       ui.menu_button("File", |ui| {
-        if ui.add(egui::Button::new("New").shortcut_text(ui.ctx().format_shortcut(&shortcut_new))).on_hover_text("New scene").clicked() {
+        if ui.add(egui::Button::new("🗋 New").shortcut_text(ui.ctx().format_shortcut(&shortcut_new))).on_hover_text("New scene").clicked() {
           self.toggle_dialog_new(ui);
         }
-        if ui.add(egui::Button::new("Open").shortcut_text(ui.ctx().format_shortcut(&shortcut_open))).on_hover_text("Open existing scene").clicked() {
+        if ui.add(egui::Button::new("🗁 Open").shortcut_text(ui.ctx().format_shortcut(&shortcut_open))).on_hover_text("Open existing scene").clicked() {
           self.toggle_dialog_open(ui);
         }
-        if ui.button("Open Recent").on_hover_text("Open recent scene").clicked() {
+        if ui.button("🗐 Open Recent").on_hover_text("Open recent scene").clicked() {
         }
-        if ui.add(egui::Button::new("Save").shortcut_text(ui.ctx().format_shortcut(&shortcut_save))).on_hover_text("New Save scene to a file").clicked() {
+        if ui.add(egui::Button::new("🖴 Save").shortcut_text(ui.ctx().format_shortcut(&shortcut_save))).on_hover_text("New Save scene to a file").clicked() {
           self.toggle_dialog_save(ui);
         }
         ui.separator();
-        if ui.add(egui::Button::new("Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() { self.exit_kuplung(ui); }
+        if ui.add(egui::Button::new("🗙 Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() { self.exit_kuplung(ui); }
       });
       ui.separator();
       ui.menu_button("Help", |ui| {
-        if ui.button("Metrics").on_hover_text("Show scene stats").clicked() {
+        if ui.button("📏 Metrics").on_hover_text("Show scene stats").clicked() {
         }
-        if ui.add(egui::Button::new("Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
-        if ui.button("Options").on_hover_text("Configure Kuplung options").clicked() { self.toggle_options(ui); }
+        if ui.add(egui::Button::new("📺 Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
+        if ui.button("🛠 Options").on_hover_text("Configure Kuplung options").clicked() { self.toggle_options(ui); }
         ui.separator();
-        if ui.button("Log").on_hover_text("Toggle log window").clicked() { self.toggle_component_log(ui); }
+        if ui.button("🖹 Log").on_hover_text("Toggle log window").clicked() { self.toggle_component_log(ui); }
         ui.separator();
         if ui.button("About Kuplung").clicked() { self.toggle_about(ui); }
       });
@@ -215,29 +216,32 @@ impl UIManager {
       .title_bar(false)
       .auto_sized()
       .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
+      .max_width(400.0)
       .show(ctx, |ui| {
-        ui.label("Kuplung 1.0");
-        ui.separator();
-        ui.horizontal(|ui| {
-          ui.spacing_mut().item_spacing.x = 0.0;
-          ui.label("By ");
-          ui.hyperlink_to(
-            "supudo.net",
-            "https://supudo.net",
-          );
-          ui.label(" + ");
-          ui.hyperlink_to(
-            "github.com/supudo",
-            "https://github.com/supudo/Kuplung-Rust",
-          );
-          ui.label(".");
+        ui.vertical_centered(|ui| {
+          ui.label("Kuplung 1.0");
+          ui.separator();
+          ui.horizontal_top(|ui| {
+            ui.spacing_mut().item_spacing.x = 0.0;
+            ui.label("By ");
+            ui.hyperlink_to(
+              "supudo.net",
+              "https://supudo.net",
+            );
+            ui.label(" + ");
+            ui.hyperlink_to(
+              "github.com/supudo",
+              "https://github.com/supudo/Kuplung-Rust",
+            );
+            ui.label(".");
+          });
+          ui.label("Whatever license...");
+          ui.separator();
+          ui.label("Hold mouse wheel to rotate around");
+          ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
+          ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
+          if ui.button("Close").clicked() { self.show_about = false; }
         });
-        ui.label("Whatever license...");
-        ui.separator();
-        ui.label("Hold mouse wheel to rotate around");
-        ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
-        ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
-        if ui.button("Close").clicked() { self.show_about = false; }
       });
   }
 

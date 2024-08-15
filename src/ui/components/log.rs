@@ -21,7 +21,7 @@ impl ComponentLog {
   }
 
   pub fn log_info(&mut self, message: &str) {
-    if (self.buffer_log.is_empty()) {
+    if self.buffer_log.is_empty() {
       self.buffer_log = message.to_string();
     }
     else {
@@ -38,7 +38,7 @@ impl ComponentLog {
       .resizable(true)
       .enabled(true)
       .default_size([configuration::COMPONENT_LOG_WIDTH, configuration::COMPONENT_LOG_HEIGHT])
-      .current_pos([posx, posy])
+      .default_pos([posx, posy])
       .show(ctx, |ui| {
         ui.horizontal(|ui| {
           if ui.button("Clear").on_hover_text("Clear log").clicked() { self.clear_log_text(); }

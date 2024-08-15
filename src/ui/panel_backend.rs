@@ -12,13 +12,12 @@ impl Default for RunMode {
 
 #[derive(Default)]
 pub struct PanelBackend {
-  pub open: bool,
   run_mode: RunMode,
   egui_windows: EguiWindows,
 }
 
 impl PanelBackend {
-  pub fn update(&mut self, ctx: &egui::Context, frame: &eframe::Frame) {
+  pub fn update(&mut self, ctx: &egui::Context) {
     match self.run_mode {
       RunMode::Continuous => {
         ctx.request_repaint();
