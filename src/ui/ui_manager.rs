@@ -1,5 +1,6 @@
-use egui::{Context, Modifiers, Ui};
+use egui::{Context, Modifiers, TextEdit, Ui};
 use log::info;
+use crate::settings::configuration;
 use crate::ui::dialogs::options;
 use crate::ui::{components, panel_backend};
 use crate::ui::components::log::ComponentLog;
@@ -209,6 +210,38 @@ impl UIManager {
   }
 
   fn render_about(&mut self, ctx: &Context) {
+    egui::Window::new("About Kuplung")
+      .id(egui::Id::new("about_kuplung"))
+      .open(&mut self.show_about)
+      .resizable(false)
+      .enabled(true)
+      .auto_sized()
+      .max_size([configuration::COMPONENT_LOG_WIDTH, configuration::COMPONENT_LOG_HEIGHT])
+      .show(ctx, |ui| {
+        ui.horizontal_centered(|ui| {
+          ui.label("Kuplung 1.0");
+        });
+        ui.separator();
+        ui.horizontal_centered(|ui| {
+          ui.spacing_mut().item_spacing.x = 0.0;
+          ui.label("By ");
+          ui.hyperlink_to(
+            "supudo.net",
+            "https://supudo.net",
+          );
+          ui.label(" + ");
+          ui.hyperlink_to(
+            "github.com/supudo",
+            "https://github.com/supudo/Kuplung-Rust",
+          );
+          ui.label(".");
+        });
+        ui.label("Whatever license...");
+        ui.separator();
+        ui.label("Hold mouse wheel to rotate around");
+        ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
+        ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
+      });
   }
 
   fn exit_kuplung(&mut self, ui: &mut Ui) {
