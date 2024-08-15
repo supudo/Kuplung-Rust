@@ -61,23 +61,29 @@ impl UIManager {
     // shortcuts
     let shortcut_quit = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::Escape);
     let shortcut_new = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::N);
+    let shortcut_open = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::O);
+    let shortcut_save = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::S);
     let shortcut_backend = egui::KeyboardShortcut::new(Modifiers::SHIFT | Modifiers::CTRL | Modifiers::ALT, egui::Key::B);
 
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { std::process::exit(0); }
-    if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { todo!() }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { self.toggle_dialog_new(); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_open)) { self.toggle_dialog_open(); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_save)) { self.toggle_dialog_save(); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_backend)) { self.toggle_backend(ui); }
 
     // main menu
     egui::menu::bar(ui, |ui| {
       ui.menu_button("File", |ui| {
         if ui.add(egui::Button::new("New").shortcut_text(ui.ctx().format_shortcut(&shortcut_new))).on_hover_text("New scene").clicked() {
-          todo!()
+          self.toggle_dialog_new();
         }
-        if ui.button("Open").on_hover_text("Open existing scene").clicked() {
+        if ui.add(egui::Button::new("Open").shortcut_text(ui.ctx().format_shortcut(&shortcut_open))).on_hover_text("Open existing scene").clicked() {
+          self.toggle_dialog_open();
         }
         if ui.button("Open Recent").on_hover_text("Open recent scene").clicked() {
         }
-        if ui.button("Save...").on_hover_text("Save scene to a file").clicked() {
+        if ui.add(egui::Button::new("Save").shortcut_text(ui.ctx().format_shortcut(&shortcut_save))).on_hover_text("New Save scene to a file").clicked() {
+          self.toggle_dialog_save();
         }
         ui.separator();
         if ui.add(egui::Button::new("Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() {
@@ -146,5 +152,17 @@ impl UIManager {
   fn toggle_backend(&mut self, ui: &mut Ui) {
     self.show_backend = !self.show_backend;
     ui.close_menu();
+  }
+
+  fn toggle_dialog_new(&mut self) {
+    todo!()
+  }
+
+  fn toggle_dialog_open(&mut self) {
+    todo!()
+  }
+
+  fn toggle_dialog_save(&mut self) {
+    todo!()
   }
 }
