@@ -1,6 +1,8 @@
-use egui::{Modifiers, Ui};
+use egui::{Context, Modifiers, Ui};
 use log::info;
-use crate::ui::panel_backend;
+use crate::ui::dialogs::options;
+use crate::ui::{components, panel_backend};
+use crate::ui::components::log::ComponentLog;
 
 #[derive(Clone, Copy, Debug)]
 #[must_use]
@@ -13,7 +15,11 @@ enum Command {
 pub struct UIManager {
   dark_mode: bool,
   show_backend: bool,
-  panel_backend: panel_backend::PanelBackend
+  panel_backend: panel_backend::PanelBackend,
+  show_options: bool,
+  show_about: bool,
+  show_component_log: bool,
+  component_log: ComponentLog
 }
 
 impl UIManager {
@@ -22,7 +28,11 @@ impl UIManager {
     let this = Self {
       dark_mode: false,
       show_backend: false,
-      panel_backend: panel_backend::PanelBackend::default()
+      panel_backend: panel_backend::PanelBackend::default(),
+      show_options: false,
+      show_about: false,
+      show_component_log: true,
+      component_log: ComponentLog::new()
     };
     info!("[Kuplung] [UI] UI initialized.");
     this
@@ -32,11 +42,7 @@ impl UIManager {
     egui::CentralPanel::default().show(ctx, |ui| {
       let mut cmd = Command::Nothing;
 
-      // egui backend panel
-      self.panel_backend.update(ctx, frame);
-      cmd = self.panel_backend_show(ctx, frame);
-      self.panel_backend.end_of_frame(ctx);
-
+      // main menu
       egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
           // main menu
@@ -44,8 +50,21 @@ impl UIManager {
         });
       });
 
+      // egui backend panel
+      self.panel_backend.update(ctx, frame);
+      cmd = self.panel_backend_show(ctx, frame);
+      self.panel_backend.end_of_frame(ctx);
+
+      if (self.show_options) { self.render_options(ctx); }
+      if (self.show_component_log) { self.render_component_log(ctx); }
+      if (self.show_about) { self.render_about(ctx); }
+
       self.run_cmd(ctx, cmd);
     });
+  }
+
+  pub fn log_info(&mut self, message: &str) {
+    self.component_log.log_info(message);
   }
 
   fn run_cmd(&mut self, ctx: &egui::Context, cmd: Command) {
@@ -66,38 +85,38 @@ impl UIManager {
     let shortcut_backend = egui::KeyboardShortcut::new(Modifiers::SHIFT | Modifiers::CTRL | Modifiers::ALT, egui::Key::B);
 
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { std::process::exit(0); }
-    if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { self.toggle_dialog_new(); }
-    if ui.input_mut(|i| i.consume_shortcut(&shortcut_open)) { self.toggle_dialog_open(); }
-    if ui.input_mut(|i| i.consume_shortcut(&shortcut_save)) { self.toggle_dialog_save(); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { self.toggle_dialog_new(ui); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_open)) { self.toggle_dialog_open(ui); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_save)) { self.toggle_dialog_save(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_backend)) { self.toggle_backend(ui); }
 
     // main menu
     egui::menu::bar(ui, |ui| {
       ui.menu_button("File", |ui| {
         if ui.add(egui::Button::new("New").shortcut_text(ui.ctx().format_shortcut(&shortcut_new))).on_hover_text("New scene").clicked() {
-          self.toggle_dialog_new();
+          self.toggle_dialog_new(ui);
         }
         if ui.add(egui::Button::new("Open").shortcut_text(ui.ctx().format_shortcut(&shortcut_open))).on_hover_text("Open existing scene").clicked() {
-          self.toggle_dialog_open();
+          self.toggle_dialog_open(ui);
         }
         if ui.button("Open Recent").on_hover_text("Open recent scene").clicked() {
         }
         if ui.add(egui::Button::new("Save").shortcut_text(ui.ctx().format_shortcut(&shortcut_save))).on_hover_text("New Save scene to a file").clicked() {
-          self.toggle_dialog_save();
+          self.toggle_dialog_save(ui);
         }
         ui.separator();
-        if ui.add(egui::Button::new("Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() {
-          ui.close_menu();
-          std::process::exit(0);
-        }
+        if ui.add(egui::Button::new("Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() { self.exit_kuplung(ui); }
       });
       ui.separator();
       ui.menu_button("Help", |ui| {
         if ui.button("Metrics").on_hover_text("Show scene stats").clicked() {
         }
         if ui.add(egui::Button::new("Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
-        if ui.button("About Kuplung").clicked() {
-        }
+        if ui.button("Options").on_hover_text("Configure Kuplung options").clicked() { self.toggle_options(ui); }
+        ui.separator();
+        if ui.button("Log").on_hover_text("Toggle log window").clicked() { self.toggle_component_log(ui); }
+        ui.separator();
+        if ui.button("About Kuplung").clicked() { self.toggle_about(ui); }
       });
       ui.separator();
       self.show_theme(ui);
@@ -154,15 +173,46 @@ impl UIManager {
     ui.close_menu();
   }
 
-  fn toggle_dialog_new(&mut self) {
-    todo!()
+  fn toggle_dialog_new(&mut self, ui: &mut Ui) {
+    ui.close_menu();
   }
 
-  fn toggle_dialog_open(&mut self) {
-    todo!()
+  fn toggle_dialog_open(&mut self, ui: &mut Ui) {
+    ui.close_menu();
   }
 
-  fn toggle_dialog_save(&mut self) {
-    todo!()
+  fn toggle_dialog_save(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+  }
+
+  fn toggle_options(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+    self.show_options = !self.show_options;
+  }
+
+  fn toggle_component_log(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+    self.show_component_log = !self.show_component_log;
+  }
+
+  fn toggle_about(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+    self.show_about = !self.show_about;
+  }
+
+  fn render_options(&mut self, ctx: &Context) {
+    options::render_dialog_options(ctx);
+  }
+
+  fn render_component_log(&mut self, ctx: &Context) {
+    self.component_log.render_component_log(ctx);
+  }
+
+  fn render_about(&mut self, ctx: &Context) {
+  }
+
+  fn exit_kuplung(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+    std::process::exit(0);
   }
 }

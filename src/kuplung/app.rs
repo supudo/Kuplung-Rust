@@ -1,5 +1,6 @@
 use eframe::{glow, HardwareAcceleration, Renderer, Theme};
 use eframe::egui_glow::ShaderVersion;
+use eframe::epaint::text::FontData;
 use egui::ViewportBuilder;
 use log::info;
 
@@ -47,6 +48,12 @@ impl KuplungApp {
   fn new(cc: &eframe::CreationContext<'_>) -> Self {
     // set light mode as initial theme
     cc.egui_ctx.set_visuals(egui::Visuals::light());
+
+    // load fonts
+    let mut fonts = egui::FontDefinitions::default();
+    fonts.font_data.insert("font_awesome".to_owned(), FontData::from_static(include_bytes!(concat!(env!("OUT_DIR"), "/assets/fonts/fontawesome-webfont.ttf"))));
+    fonts.font_data.insert("font_material".to_owned(), FontData::from_static(include_bytes!(concat!(env!("OUT_DIR"), "/assets/fonts/material-icons-regular.ttf"))));
+    cc.egui_ctx.set_fonts(fonts);
 
     // initialize sub-systems
     let manager_ui = ui_manager::UIManager::new();

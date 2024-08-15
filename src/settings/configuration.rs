@@ -7,6 +7,9 @@ pub const WINDOW_HEIGHT: f32 = 600.0;
 pub const WINDOW_POSITION_X: f64 = 100.0;
 pub const WINDOW_POSITION_Y: f64 = 100.0;
 
+pub const COMPONENT_LOG_WIDTH: f32 = 400.0;
+pub const COMPONENT_LOG_HEIGHT: f32 = 200.0;
+
 pub const KUPLUNG_LOG_LEVEL: &str = "KUPLUNG_LOG_LEVEL";
 pub const KUPLUNG_LOG_LEVEL_VALUE: &str = "trace";
 pub const KUPLUNG_LOG_STYLE: &str = "KUPLUNG_LOG_STYLE";
