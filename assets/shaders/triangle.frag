@@ -1,3 +1,4 @@
+#version 410 core
 precision mediump float;
 
 varying vec3 v_color;

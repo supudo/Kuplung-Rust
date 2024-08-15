@@ -10,9 +10,9 @@ use crate::settings::configuration;
 
 #[rustfmt::skip]
 pub static VERTEX_DATA: [f32; 15] = [
-    0.0,  1.0,  1.0,  0.0,  0.0,
-   -1.0, -1.0,  0.0,  1.0,  0.0,
-    1.0, -1.0,  0.0,  0.0,  1.0,
+  -0.5, -0.5,  1.0,  0.0,  0.0,
+   0.5, -0.5,  0.0,  1.0,  0.0,
+   0.0,  0.5,  0.0,  0.0,  1.0,
 ];
 
 pub struct Triangler {
@@ -52,12 +52,12 @@ impl Triangler {
       let vertex_array = gl.create_vertex_array().expect("[Kuplung] [Triangler] Cannot create vertex array!");
       gl.bind_vertex_array(Some(vertex_array));
 
-      let attrib_position = gl.get_attrib_location(program, "position");
-      gl.vertex_attrib_pointer_f32(attrib_position.unwrap(), 2, glow::FLOAT, false, 8, 0);
+      let attrib_position = gl.get_attrib_location(program, "vs_position");
+      gl.vertex_attrib_pointer_f32(attrib_position.unwrap(), 2, glow::FLOAT, false, 2, 0);
       gl.enable_vertex_attrib_array(attrib_position.unwrap());
 
-      let attrib_color = gl.get_attrib_location(program, "color");
-      gl.vertex_attrib_pointer_f32(attrib_color.unwrap(), 3, glow::FLOAT, false, 8, 0);
+      let attrib_color = gl.get_attrib_location(program, "vs_color");
+      gl.vertex_attrib_pointer_f32(attrib_color.unwrap(), 3, glow::FLOAT, false, 3, 0);
       gl.enable_vertex_attrib_array(attrib_color.unwrap());
 
       Some(Self {
@@ -83,9 +83,9 @@ impl Triangler {
       gl.bind_vertex_array(Some(self.vertex_array));
       gl.bind_buffer(glow::ARRAY_BUFFER, Some(self.vertex_buffer));
 
-      gl.uniform_1_f32(gl.get_uniform_location(self.program, "u_angle").as_ref(), angle);
-      /*gl.uniform_1_f32(gl.get_uniform_location(self.program, "position").as_ref(), angle);
-      gl.uniform_1_f32(gl.get_uniform_location(self.program, "color").as_ref(), angle);*/
+      gl.uniform_1_f32(gl.get_uniform_location(self.program, "vs_angle").as_ref(), angle);
+      /*gl.uniform_1_f32(gl.get_uniform_location(self.program, "vs_position").as_ref(), angle);
+      gl.uniform_1_f32(gl.get_uniform_location(self.program, "vs_color").as_ref(), angle);*/
 
       gl.clear_color(configuration::GL_CLEAR_COLOR_R, configuration::GL_CLEAR_COLOR_G, configuration::GL_CLEAR_COLOR_B, configuration::GL_CLEAR_COLOR_A);
       gl.draw_arrays(glow::TRIANGLES, 0, 3);
