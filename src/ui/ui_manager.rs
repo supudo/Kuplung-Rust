@@ -212,17 +212,13 @@ impl UIManager {
   fn render_about(&mut self, ctx: &Context) {
     egui::Window::new("About Kuplung")
       .id(egui::Id::new("about_kuplung"))
-      .open(&mut self.show_about)
-      .resizable(false)
-      .enabled(true)
+      .title_bar(false)
       .auto_sized()
-      .max_size([configuration::COMPONENT_LOG_WIDTH, configuration::COMPONENT_LOG_HEIGHT])
+      .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
       .show(ctx, |ui| {
-        ui.horizontal_centered(|ui| {
-          ui.label("Kuplung 1.0");
-        });
+        ui.label("Kuplung 1.0");
         ui.separator();
-        ui.horizontal_centered(|ui| {
+        ui.horizontal(|ui| {
           ui.spacing_mut().item_spacing.x = 0.0;
           ui.label("By ");
           ui.hyperlink_to(
@@ -241,6 +237,7 @@ impl UIManager {
         ui.label("Hold mouse wheel to rotate around");
         ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
         ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
+        if ui.button("Close").clicked() { self.show_about = false; }
       });
   }
 

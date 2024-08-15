@@ -30,11 +30,15 @@ impl ComponentLog {
   }
 
   pub fn render_component_log(&mut self, ctx: &Context) {
+    let screen_rect = ctx.screen_rect();
+    let posx: f32 = screen_rect.size().x / 2.0 - configuration::COMPONENT_LOG_WIDTH / 2.0;
+    let posy: f32 = screen_rect.size().y - (configuration::COMPONENT_LOG_HEIGHT + 80.0);
     egui::Window::new("Log")
       .id(egui::Id::new("component_log"))
       .resizable(true)
       .enabled(true)
       .default_size([configuration::COMPONENT_LOG_WIDTH, configuration::COMPONENT_LOG_HEIGHT])
+      .current_pos([posx, posy])
       .show(ctx, |ui| {
         ui.horizontal(|ui| {
           if ui.button("Clear").on_hover_text("Clear log").clicked() { self.clear_log_text(); }
@@ -45,7 +49,12 @@ impl ComponentLog {
         });
         ui.separator();
         ui.label("Log messages:");
-        ui.add_sized(ui.available_size(), TextEdit::multiline(&mut self.buffer_log));
+        egui::Frame::default()
+          .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
+          .rounding(ui.visuals().widgets.noninteractive.rounding)
+          .show(ui, |ui| {
+            ui.add_sized(ui.available_size(), TextEdit::multiline(&mut self.buffer_log));
+          });
       });
   }
 
