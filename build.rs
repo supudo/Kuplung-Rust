@@ -1,6 +1,5 @@
 use std::{
   env, fs, io,
-  fs::File,
   path::{Path, PathBuf}
 };
 #[cfg(target_os = "macos")]
@@ -9,7 +8,6 @@ use std::process::Command;
 const ASSETS_DIR: &'static str = "assets";
 
 fn main()-> io::Result<()> {
-  let dest = PathBuf::from(&env::var("OUT_DIR").unwrap());
   println!("cargo:rerun-if-changed=build.rs");
 
   // copy the assets folder

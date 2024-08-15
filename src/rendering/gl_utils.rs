@@ -3,7 +3,6 @@ use std::io::Read;
 use eframe::egui_glow::ShaderVersion;
 use eframe::glow;
 use eframe::glow::HasContext;
-use egui::TextBuffer;
 use log::info;
 
 pub unsafe fn create_shader(program: &glow::Program, gl: &glow::Context, shader_version: ShaderVersion, shader_type: u32, shader_filepath: &str) -> glow::Shader {

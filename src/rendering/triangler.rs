@@ -1,10 +1,8 @@
-use std::ffi::CString;
-use std::io::Read;
 use eframe::egui_glow;
 use eframe::glow::HasContext;
 use egui_glow::glow;
 
-use log::{info, warn};
+use log::warn;
 use crate::rendering::gl_utils;
 use crate::settings::configuration;
 
