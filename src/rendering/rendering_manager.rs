@@ -19,7 +19,7 @@ impl RenderingManager {
 
     let gl = cc.gl.as_ref()?;
     let this = Self {
-      show_triangler: false,
+      show_triangler: true,
       triangler: Arc::new(Mutex::new(Triangler::new(gl)?)),
       angle: 0.0,
     };
@@ -59,7 +59,7 @@ impl eframe::App for RenderingManager {
           ui.label("It's not a very impressive demo, but it shows you can embed 3D inside of egui.");
 
           egui::Frame::canvas(ui.style()).show(ui, |ui| {
-            self.paint_triangler(ui);
+            if self.show_triangler { self.paint_triangler(ui); }
           });
           ui.label("Drag to rotate!");
         });
