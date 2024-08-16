@@ -1,5 +1,6 @@
 use egui::{Context, Modifiers, Ui};
 use log::info;
+use crate::settings::configuration;
 use crate::ui::dialogs::options;
 use crate::ui::panel_backend;
 use crate::ui::components::log::ComponentLog;
@@ -211,7 +212,77 @@ impl UIManager {
   }
 
   fn render_about(&mut self, ctx: &Context) {
+    let screen_rect = ctx.screen_rect();
     egui::Window::new("About Kuplung")
+      .id(egui::Id::new("about_kuplung"))
+      .title_bar(false)
+      .current_pos([0.0, 0.0])
+      .min_size([screen_rect.size().x, screen_rect.size().y])
+      .anchor(egui::Align2::LEFT_TOP, egui::Vec2::ZERO)
+      .show(ctx, |ui| {
+        ui.set_width(ui.available_width());
+        ui.set_height(ui.available_height());
+        ui.vertical(|ui| {
+
+          egui::Frame::default()
+            .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
+            .rounding(ui.visuals().widgets.noninteractive.rounding)
+            .fill(egui::Color32::from_rgb(56, 56, 56))
+            .show(ui, |ui| {
+              ui.vertical_centered(|ui| {
+                ui.set_width(400.0);
+                ui.set_height(300.0);
+                ui.label("Kuplung 1.0");
+                ui.separator();
+                ui.horizontal(|ui| {
+                  ui.spacing_mut().item_spacing.x = 0.0;
+                  ui.label("By ");
+                  ui.hyperlink_to(
+                    "supudo.net",
+                    "https://supudo.net",
+                  );
+                  ui.label(" + ");
+                  ui.hyperlink_to(
+                    "github.com/supudo",
+                    "https://github.com/supudo/Kuplung-Rust",
+                  );
+                  ui.label(".");
+                });
+                ui.label("Whatever license...");
+                ui.separator();
+                ui.label("Hold mouse wheel to rotate around");
+                ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
+                ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
+                if ui.button("Close").clicked() { self.show_about = false; }
+              });
+            });
+
+          /*ui.label("Kuplung 1.0");
+          ui.separator();
+          ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 0.0;
+            ui.label("By ");
+            ui.hyperlink_to(
+              "supudo.net",
+              "https://supudo.net",
+            );
+            ui.label(" + ");
+            ui.hyperlink_to(
+              "github.com/supudo",
+              "https://github.com/supudo/Kuplung-Rust",
+            );
+            ui.label(".");
+          });
+          ui.label("Whatever license...");
+          ui.separator();
+          ui.label("Hold mouse wheel to rotate around");
+          ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
+          ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
+          if ui.button("Close").clicked() { self.show_about = false; }*/
+
+        });
+      });
+    /*egui::Window::new("About Kuplung")
       .id(egui::Id::new("about_kuplung"))
       .title_bar(false)
       .auto_sized()
@@ -221,7 +292,7 @@ impl UIManager {
         ui.vertical_centered(|ui| {
           ui.label("Kuplung 1.0");
           ui.separator();
-          ui.horizontal_top(|ui| {
+          ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 0.0;
             ui.label("By ");
             ui.hyperlink_to(
@@ -242,7 +313,7 @@ impl UIManager {
           ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
           if ui.button("Close").clicked() { self.show_about = false; }
         });
-      });
+      });*/
   }
 
   fn exit_kuplung(&mut self, ui: &mut Ui) {
