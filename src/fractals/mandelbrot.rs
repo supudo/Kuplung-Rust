@@ -9,10 +9,13 @@ use crate::rendering::gl_utils;
 use crate::settings::configuration;
 
 #[rustfmt::skip]
-pub static VERTEX_DATA: [f32; 15] = [
-    -0.5, -0.5,  1.0,  0.0,  0.0,
-    0.5, -0.5,  0.0,  1.0,  0.0,
-    0.0,  0.5,  0.0,  0.0,  1.0,
+pub static VERTEX_DATA: [f32; 30] = [
+    -1.0,  1.0,  1.0,  0.0,  0.0,
+     1.0,  1.0,  0.0,  1.0,  0.0,
+    -1.0, -1.0,  0.0,  0.0,  1.0,
+    -1.0, -1.0,  1.0,  0.0,  0.0,
+     1.0,  1.0,  0.0,  1.0,  0.0,
+     1.0, -1.0,  0.0,  0.0,  1.0,
 ];
 
 pub struct Mandelbrot {
