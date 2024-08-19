@@ -1,3 +1,4 @@
+use eframe::emath::Rect;
 use egui::{Context, Modifiers, Ui};
 use log::info;
 use crate::settings::configuration;
@@ -86,7 +87,7 @@ impl UIManager {
     let shortcut_backend = egui::KeyboardShortcut::new(Modifiers::SHIFT | Modifiers::CTRL | Modifiers::ALT, egui::Key::B);
     let shortcut_about = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::F1);
 
-    if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { std::process::exit(0); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { self.handle_key_escape(ui) }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { self.toggle_dialog_new(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_open)) { self.toggle_dialog_open(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_save)) { self.toggle_dialog_save(ui); }
@@ -124,6 +125,11 @@ impl UIManager {
       ui.separator();
       self.show_theme(ui);
     });
+  }
+
+  fn handle_key_escape(&mut self, ui: &mut Ui) {
+    if self.show_about { self.show_about = false; }
+    else { self.exit_kuplung(ui); }
   }
 
   fn panel_backend_show(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) -> Command {
@@ -219,101 +225,35 @@ impl UIManager {
       .current_pos([0.0, 0.0])
       .min_size([screen_rect.size().x, screen_rect.size().y])
       .anchor(egui::Align2::LEFT_TOP, egui::Vec2::ZERO)
+      .frame(egui::Frame::default().fill(egui::Color32::from_black_alpha(127)))
       .show(ctx, |ui| {
         ui.set_width(ui.available_width());
         ui.set_height(ui.available_height());
-        ui.vertical(|ui| {
-
-          egui::Frame::default()
-            .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .fill(egui::Color32::from_rgb(56, 56, 56))
-            .show(ui, |ui| {
-              ui.vertical_centered(|ui| {
-                ui.set_width(400.0);
-                ui.set_height(300.0);
-                ui.label("Kuplung 1.0");
-                ui.separator();
-                ui.horizontal(|ui| {
-                  ui.spacing_mut().item_spacing.x = 0.0;
-                  ui.label("By ");
-                  ui.hyperlink_to(
-                    "supudo.net",
-                    "https://supudo.net",
-                  );
-                  ui.label(" + ");
-                  ui.hyperlink_to(
-                    "github.com/supudo",
-                    "https://github.com/supudo/Kuplung-Rust",
-                  );
-                  ui.label(".");
-                });
-                ui.label("Whatever license...");
-                ui.separator();
-                ui.label("Hold mouse wheel to rotate around");
-                ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
-                ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
-                if ui.button("Close").clicked() { self.show_about = false; }
-              });
+        egui::Frame::default()
+          .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
+          .rounding(ui.visuals().widgets.noninteractive.rounding)
+          .fill(egui::Color32::LIGHT_GRAY)
+          .outer_margin(egui::Margin::symmetric(screen_rect.center().x - 160.0, screen_rect.center().y - 60.0))
+          .show(ui, |ui| {
+            ui.set_width(320.0);
+            ui.set_height(140.0);
+            ui.vertical_centered(|ui| {
+              ui.label("");
+              ui.label("Kuplung 1.0");
+              ui.label("");
+              ui.hyperlink_to("supudo.net", "https://supudo.net");
+              ui.hyperlink_to("github.com/supudo", "https://github.com/supudo/Kuplung-Rust");
+              ui.label("Whatever license...");
+              ui.label("");
+              ui.label("Hold mouse wheel to rotate around");
+              ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
+              ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
+              ui.label("");
+              if ui.add(egui::Button::new("Close").min_size(egui::Vec2::new(100.0, 30.0))).clicked() { self.show_about = false; }
+              ui.label("");
             });
-
-          /*ui.label("Kuplung 1.0");
-          ui.separator();
-          ui.horizontal(|ui| {
-            ui.spacing_mut().item_spacing.x = 0.0;
-            ui.label("By ");
-            ui.hyperlink_to(
-              "supudo.net",
-              "https://supudo.net",
-            );
-            ui.label(" + ");
-            ui.hyperlink_to(
-              "github.com/supudo",
-              "https://github.com/supudo/Kuplung-Rust",
-            );
-            ui.label(".");
           });
-          ui.label("Whatever license...");
-          ui.separator();
-          ui.label("Hold mouse wheel to rotate around");
-          ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
-          ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
-          if ui.button("Close").clicked() { self.show_about = false; }*/
-
-        });
       });
-    /*egui::Window::new("About Kuplung")
-      .id(egui::Id::new("about_kuplung"))
-      .title_bar(false)
-      .auto_sized()
-      .anchor(egui::Align2::CENTER_CENTER, egui::Vec2::ZERO)
-      .max_width(400.0)
-      .show(ctx, |ui| {
-        ui.vertical_centered(|ui| {
-          ui.label("Kuplung 1.0");
-          ui.separator();
-          ui.horizontal(|ui| {
-            ui.spacing_mut().item_spacing.x = 0.0;
-            ui.label("By ");
-            ui.hyperlink_to(
-              "supudo.net",
-              "https://supudo.net",
-            );
-            ui.label(" + ");
-            ui.hyperlink_to(
-              "github.com/supudo",
-              "https://github.com/supudo/Kuplung-Rust",
-            );
-            ui.label(".");
-          });
-          ui.label("Whatever license...");
-          ui.separator();
-          ui.label("Hold mouse wheel to rotate around");
-          ui.label("Left Alt + Mouse wheel to increase/decrease the FOV");
-          ui.label("Left Shift + Mouse wheel to increase/decrease the FOV");
-          if ui.button("Close").clicked() { self.show_about = false; }
-        });
-      });*/
   }
 
   fn exit_kuplung(&mut self, ui: &mut Ui) {
