@@ -9,6 +9,7 @@ mod kuplung;
 mod settings;
 mod rendering;
 mod ui;
+mod fractals;
 
 fn main() -> eframe::Result {
   kuplung::app::main()

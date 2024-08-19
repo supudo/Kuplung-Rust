@@ -3,7 +3,7 @@ use eframe::egui_glow::ShaderVersion;
 use eframe::epaint::text::FontData;
 use egui::ViewportBuilder;
 use log::info;
-
+use crate::fractals::fractals_manager;
 use crate::rendering::rendering_manager;
 use crate::settings::configuration;
 use crate::ui::ui_manager;
@@ -40,8 +40,9 @@ pub fn main() -> eframe::Result {
 
 #[derive(Default)]
 struct KuplungApp {
-  manager_rendering: Option<rendering_manager::RenderingManager>,
   manager_ui: ui_manager::UIManager,
+  manager_rendering: Option<rendering_manager::RenderingManager>,
+  manager_fractals: Option<fractals_manager::FractalsManager>,
 }
 
 impl KuplungApp {
@@ -58,9 +59,11 @@ impl KuplungApp {
     // initialize sub-systems
     let manager_ui = ui_manager::UIManager::new();
     let manager_rendering = rendering_manager::RenderingManager::new(cc);
+    let manager_fractals = fractals_manager::FractalsManager::new(cc);
     let this = Self {
       manager_ui,
-      manager_rendering
+      manager_rendering,
+      manager_fractals,
     };
 
     info!("[Kuplung] egui initialized.");
@@ -72,11 +75,18 @@ impl eframe::App for KuplungApp {
   fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
     self.manager_ui.render(ctx, frame);
     self.manager_rendering.as_mut().unwrap().update(ctx, frame);
+    self.manager_fractals.as_mut().unwrap().update(ctx, frame);
   }
 
   fn on_exit(&mut self, gl: Option<&glow::Context>) {
     if let Some(manager_rendering) = &mut self.manager_rendering {
       manager_rendering.on_exit(gl);
+    }
+    if let Some(manager_rendering) = &mut self.manager_rendering {
+      manager_rendering.on_exit(gl);
+    }
+    if let Some(manager_fractals) = &mut self.manager_fractals {
+      manager_fractals.on_exit(gl);
     }
   }
 }

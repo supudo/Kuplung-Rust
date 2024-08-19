@@ -17,7 +17,7 @@ pub unsafe fn create_shader(program: &glow::Program, gl: &glow::Context, shader_
   gl.shader_source(shader, shader_source.to_str().unwrap());
   //gl.shader_source(shader, &format!("{}\n{}", shader_version.version_declaration(), shader_source.to_str().unwrap()));
   gl.compile_shader(shader);
-  assert!(gl.get_shader_compile_status(shader), "[Kuplung] [GLUtils] Failed to compile shader {shader_type}: {}", gl.get_shader_info_log(shader));
+  assert!(gl.get_shader_compile_status(shader), "[Kuplung] [GLUtils] Failed to compile shader {shader_filepath} {shader_type}: {}", gl.get_shader_info_log(shader));
   gl.attach_shader(*program, shader);
   shader
 }
