@@ -13,7 +13,6 @@ pub struct FractalsManager {
     pub show_fractals: bool,
     show_mandelbrot: bool,
     fractal_mandelbrot: Arc<Mutex<Mandelbrot>>,
-    angle: f32,
 }
 
 impl FractalsManager {
@@ -23,9 +22,8 @@ impl FractalsManager {
         let gl = cc.gl.as_ref()?;
         let this = Self {
             show_fractals: false,
-            show_mandelbrot: false,
+            show_mandelbrot: true,
             fractal_mandelbrot: Arc::new(Mutex::new(Mandelbrot::new(gl)?)),
-            angle: 0.0,
         };
 
         info!("[Kuplung] New FractalsManager finished.");
@@ -39,12 +37,12 @@ impl FractalsManager {
         });
 
         egui::Frame::canvas(ui.style()).show(ui, |ui| {
-            let (rect, response) = ui.allocate_exact_size(egui::Vec2::splat(300.0), egui::Sense::drag());
-            self.angle += response.drag_motion().x * 0.01;
-            let angle = self.angle;
+            let (rect, _) = ui.allocate_exact_size(egui::Vec2::splat(300.0), egui::Sense::drag());
             let rotating_triangle = self.fractal_mandelbrot.clone();
+            let screen_width: f32 = ui.ctx().screen_rect().size().x;
+            let screen_height: f32 = ui.ctx().screen_rect().size().y;
             let cb = egui_glow::CallbackFn::new(move |_info, painter| {
-                rotating_triangle.lock().paint(painter.gl(), angle);
+                rotating_triangle.lock().paint(painter.gl(), screen_width, screen_height);
             });
             let callback = egui::PaintCallback {
                 rect,
