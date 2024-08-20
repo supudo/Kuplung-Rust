@@ -75,7 +75,12 @@ impl eframe::App for KuplungApp {
   fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
     self.manager_ui.render(ctx, frame);
     if self.manager_ui.show_viewer { self.manager_rendering.as_mut().unwrap().update(ctx, frame); }
-    if self.manager_ui.show_fractals { self.manager_fractals.as_mut().unwrap().update(ctx, frame); }
+    if self.manager_ui.show_fractals {
+      self.manager_fractals.as_mut().unwrap().update(ctx, frame);
+      if !self.manager_fractals.as_mut().unwrap().show_fractals {
+        self.manager_ui.show_fractals = false;
+      }
+    }
   }
 
   fn on_exit(&mut self, gl: Option<&glow::Context>) {

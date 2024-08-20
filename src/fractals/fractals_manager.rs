@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use eframe::egui_glow;
 use egui::mutex::Mutex;
+use egui::Ui;
 use egui_glow::glow;
 
 use log::info;
@@ -31,7 +32,7 @@ impl FractalsManager {
         Some(this)
     }
 
-    fn paint_mandelbrot(&mut self, ui: &mut egui::Ui) {
+    fn paint_mandelbrot(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 0.0;
             ui.label("Mandelbrot");
@@ -57,14 +58,20 @@ impl FractalsManager {
 
 impl eframe::App for FractalsManager {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.show_fractals = true;
         egui::Window::new("Fractals")
           .id(egui::Id::new("window_fractals"))
           .resizable(true)
           .enabled(true)
           .default_pos([60.0, 60.0])
+          .min_size([configuration::WINDOW_POSITION_WIDTH_FRACTALS, 200.0])
           .default_size([configuration::WINDOW_POSITION_WIDTH_FRACTALS, configuration::WINDOW_POSITION_HEIGHT_FRACTALS])
           .show(ctx, |ui| {
               egui::menu::bar(ui, |ui| {
+                  if ui.button("Close").clicked() {
+                      ui.close_menu();
+                      self.show_fractals = false;
+                  }
                   ui.menu_button("Fractals", |ui| {
                       if ui.button("Mandelbrot").clicked() {
                           ui.close_menu();
@@ -74,9 +81,7 @@ impl eframe::App for FractalsManager {
               });
               ui.separator();
               if self.show_mandelbrot { self.paint_mandelbrot(ui); }
-              if !self.show_mandelbrot {
-                  ui.label("Select fractal from the menu.");
-              }
+              if !self.show_mandelbrot { ui.label("Select fractal from the menu."); }
           });
     }
 
