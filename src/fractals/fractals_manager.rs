@@ -41,7 +41,7 @@ impl FractalsManager {
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
       let rotating_triangle = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        rotating_triangle.lock().paint(painter.gl(), window_width, window_height);
+        rotating_triangle.lock().paint(painter.gl(), window_width, window_height, 100.0);
       });
       let callback = egui::PaintCallback {
         rect,

@@ -104,18 +104,15 @@ impl UIManager {
         ui.separator();
         if ui.add(egui::Button::new("🗙 Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() { self.exit_kuplung(ui); }
       });
-      ui.separator();
       ui.menu_button("Rendering", |ui| {
         if ui.add(egui::Button::new("💡 Viewer").shortcut_text(ui.ctx().format_shortcut(&shortcut_viewer))).on_hover_text("View 3D renderer").clicked() { self.toggle_window_viewer(ui); }
-        if ui.button("🎓 Fractals").clicked() { self.toggle_window_fractals(ui); }
+        if ui.add(egui::Button::new("🎓 Fractals").shortcut_text(ui.ctx().format_shortcut(&shortcut_fractals))).on_hover_text("View fractals").clicked() { self.toggle_window_fractals(ui); }
         if ui.button("🍼 Toys").clicked() { self.toggle_window_toys(ui); }
       });
-      ui.separator();
       ui.menu_button("View", |ui| {
         if ui.button("🛠 Options").on_hover_text("Configure Kuplung options").clicked() { self.toggle_options(ui); }
         if ui.add(egui::Button::new("🖹 Log").shortcut_text(ui.ctx().format_shortcut(&shortcut_component_log))).on_hover_text("Toggle log window").clicked() { self.toggle_component_log(ui); }
       });
-      ui.separator();
       ui.menu_button("Help", |ui| {
         if ui.button("📉 Metrics").on_hover_text("Show scene stats").clicked() { }
         if ui.add(egui::Button::new("📺 Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
