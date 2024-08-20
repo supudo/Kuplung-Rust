@@ -91,7 +91,7 @@ impl Triangler {
       gl.use_program(Some(self.gl_Program));
       gl.bind_vertex_array(Some(self.gl_VAO));
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "vs_angle").as_ref(), angle);
-      gl.draw_elements(glow::TRIANGLES, 3, glow::UNSIGNED_INT,0);
+      gl.draw_elements(glow::TRIANGLES, 3, glow::UNSIGNED_INT, 0);
       gl.bind_vertex_array(None);
     }
   }

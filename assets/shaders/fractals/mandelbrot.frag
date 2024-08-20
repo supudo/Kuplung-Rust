@@ -9,8 +9,9 @@ out vec4 FragColor;
 vec4 mandelbrot_color(vec4 v_position);
 
 void main() {
-    //FragColor = vec4(1.0, (mod(gl_FragCoord.y, 256) / 256), 1.0, 1.0);
-    FragColor = mandelbrot_color(fs_position);
+    //FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = vec4(1.0, (mod(gl_FragCoord.y, 256) / 256), 1.0, 1.0);
+    //FragColor = mandelbrot_color(fs_position);
 }
 
 vec4 mandelbrot_color(vec4 v_position) {
