@@ -29,8 +29,8 @@ impl Triangler {
     unsafe {
       let gl_Program = gl.create_program().expect("[Kuplung] [Triangler] Cannot create program!");
 
-      let shader_vertex = gl_utils::create_shader(&gl_Program, &gl, glow::VERTEX_SHADER, "assets/shaders/triangle.vert");
-      let shader_fragment = gl_utils::create_shader(&gl_Program, &gl, glow::FRAGMENT_SHADER, "assets/shaders/triangle.frag");
+      let shader_vertex = gl_utils::create_shader(&gl_Program, &gl, glow::VERTEX_SHADER, "assets/shaders/viewer/triangle.vert");
+      let shader_fragment = gl_utils::create_shader(&gl_Program, &gl, glow::FRAGMENT_SHADER, "assets/shaders/viewer/triangle.frag");
 
       gl.link_program(gl_Program);
       if !gl.get_program_link_status(gl_Program) {
