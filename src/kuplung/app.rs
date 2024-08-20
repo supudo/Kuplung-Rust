@@ -2,6 +2,7 @@ use eframe::{glow, HardwareAcceleration, Renderer, Theme};
 use eframe::egui_glow::ShaderVersion;
 use eframe::epaint::text::FontData;
 use egui::ViewportBuilder;
+use env_logger::Env;
 use log::info;
 use crate::fractals::fractals_manager;
 use crate::rendering::rendering_manager;
@@ -9,6 +10,13 @@ use crate::settings::configuration;
 use crate::ui::ui_manager;
 
 pub fn main() -> eframe::Result {
+  let env = Env::default()
+    .filter_or(configuration::KUPLUNG_LOG_LEVEL, configuration::KUPLUNG_LOG_LEVEL_VALUE)
+    .write_style_or(configuration::KUPLUNG_LOG_STYLE, configuration::KUPLUNG_LOG_STYLE_VALUE);
+  env_logger::init_from_env(env);
+
+  info!("[Kuplung] Initializing Kuplung...");
+
   let icon = include_bytes!(concat!(env!("OUT_DIR"), "/assets/Kuplung.png"));
   let image = image::load_from_memory(icon).expect("[Kuplung] Failed to open icon path!").to_rgba8();
   let (icon_width, icon_height) = image.dimensions();

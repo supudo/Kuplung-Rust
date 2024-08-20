@@ -1,8 +1,7 @@
 use eframe::egui_glow;
 use eframe::glow::HasContext;
 use egui_glow::glow;
-
-use log::warn;
+use log::error;
 use crate::rendering::gl_utils;
 use crate::settings::configuration;
 
@@ -35,7 +34,8 @@ impl Triangler {
 
       gl.link_program(gl_Program);
       if !gl.get_program_link_status(gl_Program) {
-        panic!( "[Kuplung] [Triangler] Program cannot be linked! {}", gl.get_program_info_log(gl_Program));
+        error!("[Kuplung] [Triangler] Program cannot be linked! {}", gl.get_program_info_log(gl_Program));
+        panic!("[Kuplung] [Triangler] Program cannot be linked! {}", gl.get_program_info_log(gl_Program));
       }
 
       gl.detach_shader(gl_Program, shader_vertex);
