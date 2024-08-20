@@ -7,10 +7,10 @@ use crate::rendering::gl_utils;
 use crate::settings::configuration;
 
 #[rustfmt::skip]
-pub static TRIANGLER_VERTICES:[f32; 9] = [
-   0.0,  1.0, 0.0,   // top right
-   1.0, -0.5, 0.0,   // bottom right
-  -1.0, -0.5, 0.0,   // bottom left
+pub static TRIANGLER_VERTICES:[f32; 18] = [
+   0.0,  1.0, 0.0, 1.0, 0.0, 0.0,   // top right
+   1.0, -0.5, 0.0, 0.0, 1.0, 0.0,   // bottom right
+  -1.0, -0.5, 0.0, 0.0, 0.0, 1.0,   // bottom left
 ];
 
 #[rustfmt::skip]
@@ -54,8 +54,11 @@ impl Triangler {
       gl.bind_buffer(glow::ELEMENT_ARRAY_BUFFER, Some(vbo_Indices));
       gl.buffer_data_u8_slice(glow::ELEMENT_ARRAY_BUFFER, bytemuck::cast_slice(&TRIANGLER_INDICES[..]), glow::STATIC_DRAW);
 
-      gl.vertex_attrib_pointer_f32(0, 3, glow::FLOAT, false, 0, 0);
+      gl.vertex_attrib_pointer_f32(0, 3, glow::FLOAT, false, size_of::<f32>() as i32 * 6, 0);
       gl.enable_vertex_attrib_array(0);
+
+      gl.vertex_attrib_pointer_f32(1, 3, glow::FLOAT, false, size_of::<f32>() as i32 * 6, size_of::<f32>() as i32 * 3);
+      gl.enable_vertex_attrib_array(1);
 
       gl.bind_vertex_array(None);
 
