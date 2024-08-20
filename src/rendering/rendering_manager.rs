@@ -35,7 +35,7 @@ impl RenderingManager {
     let angle = self.angle;
     let rotating_triangle = self.triangler.clone();
     let cb = egui_glow::CallbackFn::new(move |_info, painter| {
-      rotating_triangle.lock().paint(painter.gl());
+      rotating_triangle.lock().paint(painter.gl(), angle);
     });
     let callback = egui::PaintCallback {
       rect,

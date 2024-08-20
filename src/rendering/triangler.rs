@@ -78,13 +78,14 @@ impl Triangler {
     }
   }
 
-  pub fn paint(&self, gl: &glow::Context) {
+  pub fn paint(&self, gl: &glow::Context, angle: f32) {
     unsafe {
       gl.clear_color(configuration::GL_CLEAR_COLOR_R, configuration::GL_CLEAR_COLOR_G, configuration::GL_CLEAR_COLOR_B, configuration::GL_CLEAR_COLOR_A);
       gl.clear(glow::COLOR_BUFFER_BIT);
 
       gl.use_program(Some(self.gl_Program));
       gl.bind_vertex_array(Some(self.gl_VAO));
+      gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "vs_angle").as_ref(), angle);
       gl.draw_elements(glow::TRIANGLES, 3, glow::UNSIGNED_INT,0);
       gl.bind_vertex_array(None);
     }
