@@ -1,6 +1,5 @@
 #version 410 core
 
-in vec3 fs_color;
 in vec4 fs_position;
 in float fs_window_width;
 in float fs_window_height;
@@ -10,7 +9,7 @@ out vec4 FragColor;
 vec4 mandelbrot_color(vec4 v_position);
 
 void main() {
-    FragColor = vec4(fs_color, 1.0f);
+    //FragColor = vec4(1.0, (mod(gl_FragCoord.y, 256) / 256), 1.0, 1.0);
     FragColor = mandelbrot_color(fs_position);
 }
 

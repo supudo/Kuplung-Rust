@@ -7,8 +7,8 @@ use crate::settings::configuration;
 
 #[rustfmt::skip]
 pub static MANDELBROT_VERTICES:[f32; 18] = [
-  0.0,  1.0, 0.0, 1.0, 0.0, 0.0,   // top right
-  1.0, -0.5, 0.0, 0.0, 1.0, 0.0,   // bottom right
+   0.0,  1.0, 0.0, 1.0, 0.0, 0.0,   // top right
+   1.0, -0.5, 0.0, 0.0, 1.0, 0.0,   // bottom right
   -1.0, -0.5, 0.0, 0.0, 0.0, 1.0,   // bottom left
 ];
 
