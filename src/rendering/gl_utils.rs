@@ -1,6 +1,5 @@
 use std::ffi::CString;
 use std::io::Read;
-use eframe::egui_glow::ShaderVersion;
 use eframe::glow;
 use eframe::glow::HasContext;
 use log::{error, info};

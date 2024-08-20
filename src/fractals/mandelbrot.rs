@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use eframe::egui_glow;
 use eframe::glow::HasContext;
 use egui_glow::glow;
@@ -6,20 +8,22 @@ use crate::rendering::gl_utils;
 use crate::settings::configuration;
 
 #[rustfmt::skip]
-pub static MANDELBROT_VERTICES:[f32; 18] = [
-   0.0,  1.0, 0.0, 1.0, 0.0, 0.0,   // top right
-   1.0, -0.5, 0.0, 0.0, 1.0, 0.0,   // bottom right
-  -1.0, -0.5, 0.0, 0.0, 0.0, 1.0,   // bottom left
-];
+pub static MANDELBROT_VERTICES:[f32; 12] = [
+  // Top-left corner
+  -1.0,  1.0,
+   1.0,  1.0,
+  -1.0, -1.0,
 
-#[rustfmt::skip]
-pub static MANDELBROT_INDICES: [i32; 3] = [ 0, 1, 2 ];
+  // Bottom-right corner
+  -1.0, -1.0,
+   1.0,  1.0,
+   1.0, -1.0,
+];
 
 pub struct Mandelbrot {
   gl_Program: glow::Program,
   gl_VAO: glow::VertexArray,
   vbo_Vertices: glow::Buffer,
-  vbo_Indices: glow::Buffer,
 }
 
 #[allow(unsafe_code)]
@@ -50,15 +54,8 @@ impl Mandelbrot {
       gl.bind_buffer(glow::ARRAY_BUFFER, Some(vbo_Vertices));
       gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, bytemuck::cast_slice(&MANDELBROT_VERTICES[..]), glow::STATIC_DRAW);
 
-      let vbo_Indices = gl.create_buffer().expect("[Kuplung] [Mandelbrot] Cannot create indices buffer!");
-      gl.bind_buffer(glow::ELEMENT_ARRAY_BUFFER, Some(vbo_Indices));
-      gl.buffer_data_u8_slice(glow::ELEMENT_ARRAY_BUFFER, bytemuck::cast_slice(&MANDELBROT_INDICES[..]), glow::STATIC_DRAW);
-
       gl.vertex_attrib_pointer_f32(0, 3, glow::FLOAT, false, size_of::<f32>() as i32 * 6, 0);
       gl.enable_vertex_attrib_array(0);
-
-      gl.vertex_attrib_pointer_f32(1, 3, glow::FLOAT, false, size_of::<f32>() as i32 * 6, size_of::<f32>() as i32 * 3);
-      gl.enable_vertex_attrib_array(1);
 
       gl.bind_vertex_array(None);
 
@@ -66,7 +63,6 @@ impl Mandelbrot {
         gl_Program,
         gl_VAO,
         vbo_Vertices,
-        vbo_Indices
       })
     }
   }
@@ -77,7 +73,6 @@ impl Mandelbrot {
       gl.delete_program(self.gl_Program);
       gl.delete_vertex_array(self.gl_VAO);
       gl.delete_buffer(self.vbo_Vertices);
-      gl.delete_buffer(self.vbo_Indices);
     }
   }
 
@@ -92,7 +87,7 @@ impl Mandelbrot {
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_width").as_ref(), screen_width);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_height").as_ref(), screen_height);
 
-      gl.draw_elements(glow::TRIANGLES, 3, glow::UNSIGNED_INT,0);
+      gl.draw_arrays(glow::TRIANGLES, 0, 3);
 
       gl.bind_vertex_array(None);
     }

@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use eframe::egui_glow;
 use eframe::glow::HasContext;
 use egui_glow::glow;

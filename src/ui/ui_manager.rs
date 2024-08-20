@@ -1,7 +1,5 @@
-use eframe::emath::Rect;
 use egui::{Context, Modifiers, Ui};
 use log::info;
-use crate::settings::configuration;
 use crate::ui::dialogs::options;
 use crate::ui::panel_backend;
 use crate::ui::components::log::ComponentLog;
@@ -51,8 +49,6 @@ impl UIManager {
 
   pub fn render(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
     egui::CentralPanel::default().show(ctx, |_| {
-      let mut cmd = Command::Nothing;
-
       // main menu
       egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
@@ -63,28 +59,17 @@ impl UIManager {
 
       // egui backend panel
       self.panel_backend.update(ctx);
-      cmd = self.panel_backend_show(ctx, frame);
+      let _ = self.panel_backend_show(ctx, frame);
       self.panel_backend.end_of_frame(ctx);
 
       if self.show_options { self.render_options(ctx); }
       if self.show_component_log { self.render_component_log(ctx); }
       if self.show_about { self.render_about(ctx); }
-
-      self.run_cmd(ctx, cmd);
     });
   }
 
   pub fn log_info(&mut self, message: &str) {
     self.component_log.log_info(message);
-  }
-
-  fn run_cmd(&mut self, ctx: &egui::Context, cmd: Command) {
-    match cmd {
-      Command::Nothing => {}
-      Command::ResetEverything => {
-        ctx.memory_mut(|mem| *mem = Default::default());
-      }
-    }
   }
 
   fn show_main_menu(&mut self, ui: &mut Ui) {
