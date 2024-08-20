@@ -52,7 +52,7 @@ impl eframe::App for RenderingManager {
       .resizable(true)
       .enabled(true)
       .default_pos([60.0, 60.0])
-      .default_size([configuration::WINDOW_POSITION_WIDTH_VIEWER, configuration::WINDOW_POSITION_HEIGHT_VIEWER])
+      .default_size([configuration::WINDOW_WIDTH_VIEWER, configuration::WINDOW_HEIGHT_VIEWER])
       .hscroll(true)
       .vscroll(true)
       .show(ctx, |ui| {

@@ -39,9 +39,9 @@ impl FractalsManager {
       let window_width: f32 = ui.available_size().x;
       let window_height: f32 = ui.available_size().y;
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
-      let rotating_triangle = self.fractal_mandelbrot.clone();
+      let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        rotating_triangle.lock().paint(painter.gl(), window_width, window_height, 100.0);
+        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, 100.0);
       });
       let callback = egui::PaintCallback {
         rect,
@@ -60,8 +60,8 @@ impl eframe::App for FractalsManager {
       .resizable(true)
       .enabled(true)
       .default_pos([80.0, 80.0])
-      .min_size([configuration::WINDOW_POSITION_WIDTH_FRACTALS, 200.0])
-      .default_size([configuration::WINDOW_POSITION_WIDTH_FRACTALS, configuration::WINDOW_POSITION_HEIGHT_FRACTALS])
+      .min_size([configuration::WINDOW_WIDTH_FRACTALS, configuration::WINDOW_HEIGHT_FRACTALS])
+      .default_size([configuration::WINDOW_WIDTH_FRACTALS, configuration::WINDOW_HEIGHT_FRACTALS])
       .show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
           if ui.button("Close").clicked() {
