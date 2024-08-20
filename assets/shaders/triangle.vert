@@ -1,14 +1,7 @@
 #version 410 core
-precision mediump float;
 
-in vec2 vs_position;
-in vec3 vs_color;
-uniform float vs_angle;
-
-out vec3 v_color;
+layout (location = 0) in vec3 vs_position;
 
 void main() {
-    v_color = vs_color;
-    gl_Position = vec4(vs_position, 0.0, 1.0);
-    gl_Position.x *= cos(vs_angle);
+    gl_Position = vec4(vs_position.x, vs_position.y, vs_position.z, 1.0);
 }

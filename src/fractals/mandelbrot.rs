@@ -32,8 +32,8 @@ impl Mandelbrot {
                 return None;
             }
 
-            let shader_vertex = gl_utils::create_shader(&program, &gl, shader_version, glow::VERTEX_SHADER, "assets/shaders/triangle.vert");
-            let shader_fragment = gl_utils::create_shader(&program, &gl, shader_version, glow::FRAGMENT_SHADER, "assets/shaders/triangle.frag");
+            let shader_vertex = gl_utils::create_shader(&program, &gl, glow::VERTEX_SHADER, "assets/shaders/fractal_mandelbrot.vert");
+            let shader_fragment = gl_utils::create_shader(&program, &gl, glow::FRAGMENT_SHADER, "assets/shaders/fractal_mandelbrot.frag");
 
             gl.link_program(program);
             assert!(gl.get_program_link_status(program), "{}", gl.get_program_info_log(program));
@@ -53,10 +53,6 @@ impl Mandelbrot {
             let attrib_position = gl.get_attrib_location(program, "vs_position");
             gl.vertex_attrib_pointer_f32(attrib_position.unwrap(), 2, glow::FLOAT, false, 2, 0);
             gl.enable_vertex_attrib_array(attrib_position.unwrap());
-
-            let attrib_color = gl.get_attrib_location(program, "vs_color");
-            gl.vertex_attrib_pointer_f32(attrib_color.unwrap(), 3, glow::FLOAT, false, 3, 0);
-            gl.enable_vertex_attrib_array(attrib_color.unwrap());
 
             Some(Self {
                 program,
@@ -82,8 +78,6 @@ impl Mandelbrot {
             gl.bind_buffer(glow::ARRAY_BUFFER, Some(self.vertex_buffer));
 
             gl.uniform_1_f32(gl.get_uniform_location(self.program, "vs_angle").as_ref(), angle);
-            /*gl.uniform_1_f32(gl.get_uniform_location(self.program, "vs_position").as_ref(), angle);
-            gl.uniform_1_f32(gl.get_uniform_location(self.program, "vs_color").as_ref(), angle);*/
 
             gl.clear_color(configuration::GL_CLEAR_COLOR_R, configuration::GL_CLEAR_COLOR_G, configuration::GL_CLEAR_COLOR_B, configuration::GL_CLEAR_COLOR_A);
             gl.draw_arrays(glow::TRIANGLES, 0, 3);

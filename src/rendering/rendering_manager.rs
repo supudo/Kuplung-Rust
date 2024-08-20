@@ -35,7 +35,7 @@ impl RenderingManager {
     let angle = self.angle;
     let rotating_triangle = self.triangler.clone();
     let cb = egui_glow::CallbackFn::new(move |_info, painter| {
-      rotating_triangle.lock().paint(painter.gl(), angle);
+      rotating_triangle.lock().paint(painter.gl());
     });
     let callback = egui::PaintCallback {
       rect,
@@ -53,20 +53,22 @@ impl eframe::App for RenderingManager {
       .enabled(true)
       .default_pos([60.0, 60.0])
       .default_size([configuration::WINDOW_POSITION_WIDTH_VIEWER, configuration::WINDOW_POSITION_HEIGHT_VIEWER])
+      .hscroll(true)
+      .vscroll(true)
       .show(ctx, |ui| {
-          ui.horizontal(|ui| {
-            ui.spacing_mut().item_spacing.x = 0.0;
-            ui.label("The triangler is being painted using ");
-            ui.hyperlink_to("glow", "https://github.com/grovesNL/glow");
-            ui.label(" (OpenGL).");
-          });
-          ui.label("It's not a very impressive demo, but it shows you can embed 3D inside of egui.");
-
-          egui::Frame::canvas(ui.style()).show(ui, |ui| {
-            if self.show_triangler { self.paint_triangler(ui); }
-          });
-          ui.label("Drag to rotate!");
+        ui.horizontal(|ui| {
+          ui.spacing_mut().item_spacing.x = 0.0;
+          ui.label("The triangler is being painted using ");
+          ui.hyperlink_to("glow", "https://github.com/grovesNL/glow");
+          ui.label(" (OpenGL).");
         });
+        ui.label("It's not a very impressive demo, but it shows you can embed 3D inside of egui.");
+
+        egui::Frame::canvas(ui.style()).show(ui, |ui| {
+          if self.show_triangler { self.paint_triangler(ui); }
+        });
+        ui.label("Drag to rotate!");
+      });
   }
 
   fn on_exit(&mut self, gl: Option<&glow::Context>) {

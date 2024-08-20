@@ -95,6 +95,7 @@ impl UIManager {
     let shortcut_save = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::S);
     let shortcut_backend = egui::KeyboardShortcut::new(Modifiers::SHIFT | Modifiers::CTRL | Modifiers::ALT, egui::Key::B);
     let shortcut_about = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::F1);
+    let shortcut_viewer = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::R);
 
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { self.handle_key_escape(ui) }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { self.toggle_dialog_new(ui); }
@@ -102,6 +103,7 @@ impl UIManager {
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_save)) { self.toggle_dialog_save(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_backend)) { self.toggle_backend(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_about)) { self.toggle_about(ui); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_viewer)) { self.toggle_window_viewer(ui); }
 
     // main menu
     egui::menu::bar(ui, |ui| {
@@ -122,7 +124,9 @@ impl UIManager {
       });
       ui.separator();
       ui.menu_button("Rendering", |ui| {
-        if ui.button("💡 Viewer").clicked() { self.toggle_window_viewer(ui); }
+        if ui.add(egui::Button::new("💡 Viewer").shortcut_text(ui.ctx().format_shortcut(&shortcut_viewer))).on_hover_text("View 3D renderer").clicked() {
+          self.toggle_window_viewer(ui);
+        }
         if ui.button("🎓 Fractals").clicked() { self.toggle_window_fractals(ui); }
         if ui.button("🍼 Toys").clicked() { self.toggle_window_toys(ui); }
       });

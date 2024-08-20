@@ -1,7 +1,6 @@
 #version 410 core
 precision mediump float;
 
-in vec3 v_color;
 in vec3 fs_vertexPosition;
 
 out vec4 fragColor;
