@@ -95,7 +95,9 @@ impl UIManager {
     let shortcut_save = egui::KeyboardShortcut::new(Modifiers::CTRL, egui::Key::S);
     let shortcut_backend = egui::KeyboardShortcut::new(Modifiers::SHIFT | Modifiers::CTRL | Modifiers::ALT, egui::Key::B);
     let shortcut_about = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::F1);
-    let shortcut_viewer = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::R);
+    let shortcut_viewer = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::V);
+    let shortcut_fractals = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::F);
+    let shortcut_component_log = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::L);
 
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { self.handle_key_escape(ui) }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_new)) { self.toggle_dialog_new(ui); }
@@ -104,40 +106,34 @@ impl UIManager {
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_backend)) { self.toggle_backend(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_about)) { self.toggle_about(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_viewer)) { self.toggle_window_viewer(ui); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_fractals)) { self.toggle_window_fractals(ui); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_component_log)) { self.toggle_component_log(ui); }
 
     // main menu
     egui::menu::bar(ui, |ui| {
       ui.menu_button("File", |ui| {
-        if ui.add(egui::Button::new("🗋 New").shortcut_text(ui.ctx().format_shortcut(&shortcut_new))).on_hover_text("New scene").clicked() {
-          self.toggle_dialog_new(ui);
-        }
-        if ui.add(egui::Button::new("🗁 Open").shortcut_text(ui.ctx().format_shortcut(&shortcut_open))).on_hover_text("Open existing scene").clicked() {
-          self.toggle_dialog_open(ui);
-        }
-        if ui.button("🗐 Open Recent").on_hover_text("Open recent scene").clicked() {
-        }
-        if ui.add(egui::Button::new("🖴 Save").shortcut_text(ui.ctx().format_shortcut(&shortcut_save))).on_hover_text("New Save scene to a file").clicked() {
-          self.toggle_dialog_save(ui);
-        }
+        if ui.add(egui::Button::new("🗋 New").shortcut_text(ui.ctx().format_shortcut(&shortcut_new))).on_hover_text("New scene").clicked() { self.toggle_dialog_new(ui); }
+        if ui.add(egui::Button::new("🗁 Open").shortcut_text(ui.ctx().format_shortcut(&shortcut_open))).on_hover_text("Open existing scene").clicked() { self.toggle_dialog_open(ui); }
+        if ui.button("🗐 Open Recent").on_hover_text("Open recent scene").clicked() { }
+        if ui.add(egui::Button::new("🖴 Save").shortcut_text(ui.ctx().format_shortcut(&shortcut_save))).on_hover_text("New Save scene to a file").clicked() { self.toggle_dialog_save(ui); }
         ui.separator();
         if ui.add(egui::Button::new("🗙 Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() { self.exit_kuplung(ui); }
       });
       ui.separator();
       ui.menu_button("Rendering", |ui| {
-        if ui.add(egui::Button::new("💡 Viewer").shortcut_text(ui.ctx().format_shortcut(&shortcut_viewer))).on_hover_text("View 3D renderer").clicked() {
-          self.toggle_window_viewer(ui);
-        }
+        if ui.add(egui::Button::new("💡 Viewer").shortcut_text(ui.ctx().format_shortcut(&shortcut_viewer))).on_hover_text("View 3D renderer").clicked() { self.toggle_window_viewer(ui); }
         if ui.button("🎓 Fractals").clicked() { self.toggle_window_fractals(ui); }
         if ui.button("🍼 Toys").clicked() { self.toggle_window_toys(ui); }
       });
       ui.separator();
-      ui.menu_button("Help", |ui| {
-        if ui.button("📉 Metrics").on_hover_text("Show scene stats").clicked() {
-        }
-        if ui.add(egui::Button::new("📺 Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
+      ui.menu_button("View", |ui| {
         if ui.button("🛠 Options").on_hover_text("Configure Kuplung options").clicked() { self.toggle_options(ui); }
-        ui.separator();
-        if ui.button("🖹 Log").on_hover_text("Toggle log window").clicked() { self.toggle_component_log(ui); }
+        if ui.add(egui::Button::new("🖹 Log").shortcut_text(ui.ctx().format_shortcut(&shortcut_component_log))).on_hover_text("Toggle log window").clicked() { self.toggle_component_log(ui); }
+      });
+      ui.separator();
+      ui.menu_button("Help", |ui| {
+        if ui.button("📉 Metrics").on_hover_text("Show scene stats").clicked() { }
+        if ui.add(egui::Button::new("📺 Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
         ui.separator();
         if ui.button("About Kuplung").clicked() { self.toggle_about(ui); }
       });

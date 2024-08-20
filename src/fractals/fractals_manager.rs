@@ -63,7 +63,7 @@ impl eframe::App for FractalsManager {
           .id(egui::Id::new("window_fractals"))
           .resizable(true)
           .enabled(true)
-          .default_pos([60.0, 60.0])
+          .default_pos([80.0, 80.0])
           .min_size([configuration::WINDOW_POSITION_WIDTH_FRACTALS, 200.0])
           .default_size([configuration::WINDOW_POSITION_WIDTH_FRACTALS, configuration::WINDOW_POSITION_HEIGHT_FRACTALS])
           .show(ctx, |ui| {
