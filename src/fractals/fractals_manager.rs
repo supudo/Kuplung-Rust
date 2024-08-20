@@ -6,8 +6,10 @@ use egui_glow::glow;
 
 use log::info;
 use crate::fractals::mandelbrot::Mandelbrot;
+use crate::settings::configuration;
 
 pub struct FractalsManager {
+    pub show_fractals: bool,
     show_mandelbrot: bool,
     fractal_mandelbrot: Arc<Mutex<Mandelbrot>>,
     angle: f32,
@@ -19,7 +21,8 @@ impl FractalsManager {
 
         let gl = cc.gl.as_ref()?;
         let this = Self {
-            show_mandelbrot: true,
+            show_fractals: false,
+            show_mandelbrot: false,
             fractal_mandelbrot: Arc::new(Mutex::new(Mandelbrot::new(gl)?)),
             angle: 0.0,
         };
@@ -29,38 +32,52 @@ impl FractalsManager {
     }
 
     fn paint_mandelbrot(&mut self, ui: &mut egui::Ui) {
-        let (rect, response) = ui.allocate_exact_size(egui::Vec2::splat(300.0), egui::Sense::drag());
-        self.angle += response.drag_motion().x * 0.01;
-        let angle = self.angle;
-        let rotating_triangle = self.fractal_mandelbrot.clone();
-        let cb = egui_glow::CallbackFn::new(move |_info, painter| {
-            rotating_triangle.lock().paint(painter.gl(), angle);
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 0.0;
+            ui.label("Mandelbrot");
         });
-        let callback = egui::PaintCallback {
-            rect,
-            callback: Arc::new(cb),
-        };
-        ui.painter().add(callback);
+
+        egui::Frame::canvas(ui.style()).show(ui, |ui| {
+            let (rect, response) = ui.allocate_exact_size(egui::Vec2::splat(300.0), egui::Sense::drag());
+            self.angle += response.drag_motion().x * 0.01;
+            let angle = self.angle;
+            let rotating_triangle = self.fractal_mandelbrot.clone();
+            let cb = egui_glow::CallbackFn::new(move |_info, painter| {
+                rotating_triangle.lock().paint(painter.gl(), angle);
+            });
+            let callback = egui::PaintCallback {
+                rect,
+                callback: Arc::new(cb),
+            };
+            ui.painter().add(callback);
+        });
+        ui.label("Drag to rotate!");
     }
 }
 
 impl eframe::App for FractalsManager {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            egui::ScrollArea::both()
-                .auto_shrink(false)
-                .show(ui, |ui| {
-                    ui.horizontal(|ui| {
-                        ui.spacing_mut().item_spacing.x = 0.0;
-                        ui.label("Mandelbrot");
-                    });
-
-                    egui::Frame::canvas(ui.style()).show(ui, |ui| {
-                        if self.show_mandelbrot { self.paint_mandelbrot(ui); }
-                    });
-                    ui.label("Drag to rotate!");
-                });
-        });
+        egui::Window::new("Fractals")
+          .id(egui::Id::new("window_fractals"))
+          .resizable(true)
+          .enabled(true)
+          .default_pos([60.0, 60.0])
+          .default_size([configuration::WINDOW_POSITION_WIDTH_FRACTALS, configuration::WINDOW_POSITION_HEIGHT_FRACTALS])
+          .show(ctx, |ui| {
+              egui::menu::bar(ui, |ui| {
+                  ui.menu_button("Fractals", |ui| {
+                      if ui.button("Mandelbrot").clicked() {
+                          ui.close_menu();
+                          self.show_mandelbrot = true;
+                      }
+                  });
+              });
+              ui.separator();
+              if self.show_mandelbrot { self.paint_mandelbrot(ui); }
+              if !self.show_mandelbrot {
+                  ui.label("Select fractal from the menu.");
+              }
+          });
     }
 
     fn on_exit(&mut self, gl: Option<&glow::Context>) {

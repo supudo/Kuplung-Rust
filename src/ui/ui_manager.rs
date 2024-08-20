@@ -21,7 +21,10 @@ pub struct UIManager {
   show_options: bool,
   show_about: bool,
   show_component_log: bool,
-  component_log: ComponentLog
+  component_log: ComponentLog,
+  pub show_viewer: bool,
+  pub show_fractals: bool,
+  pub show_toys: bool,
 }
 
 impl UIManager {
@@ -34,10 +37,16 @@ impl UIManager {
       show_options: false,
       show_about: false,
       show_component_log: true,
-      component_log: ComponentLog::new()
+      component_log: ComponentLog::new(),
+      show_viewer: false,
+      show_fractals: false,
+      show_toys: false,
     };
     info!("[Kuplung] [UI] UI initialized.");
     this
+  }
+
+  pub fn on_exit(&mut self) {
   }
 
   pub fn render(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
@@ -112,8 +121,14 @@ impl UIManager {
         if ui.add(egui::Button::new("🗙 Quit").shortcut_text(ui.ctx().format_shortcut(&shortcut_quit)), ).clicked() { self.exit_kuplung(ui); }
       });
       ui.separator();
+      ui.menu_button("Rendering", |ui| {
+        if ui.button("💡 Viewer").clicked() { self.toggle_window_viewer(ui); }
+        if ui.button("🎓 Fractals").clicked() { self.toggle_window_fractals(ui); }
+        if ui.button("🍼 Toys").clicked() { self.toggle_window_toys(ui); }
+      });
+      ui.separator();
       ui.menu_button("Help", |ui| {
-        if ui.button("📏 Metrics").on_hover_text("Show scene stats").clicked() {
+        if ui.button("📉 Metrics").on_hover_text("Show scene stats").clicked() {
         }
         if ui.add(egui::Button::new("📺 Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
         if ui.button("🛠 Options").on_hover_text("Configure Kuplung options").clicked() { self.toggle_options(ui); }
@@ -192,6 +207,21 @@ impl UIManager {
 
   fn toggle_dialog_save(&mut self, ui: &mut Ui) {
     ui.close_menu();
+  }
+
+  fn toggle_window_viewer(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+    self.show_viewer = !self.show_viewer;
+  }
+
+  fn toggle_window_fractals(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+    self.show_fractals = !self.show_fractals;
+  }
+
+  fn toggle_window_toys(&mut self, ui: &mut Ui) {
+    ui.close_menu();
+    self.show_toys = !self.show_toys;
   }
 
   fn toggle_options(&mut self, ui: &mut Ui) {

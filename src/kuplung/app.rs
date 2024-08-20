@@ -10,7 +10,7 @@ use crate::ui::ui_manager;
 
 pub fn main() -> eframe::Result {
   let icon = include_bytes!(concat!(env!("OUT_DIR"), "/assets/Kuplung.png"));
-  let image = image::load_from_memory(icon).expect("[Kuplung] Failed to open icon path~").to_rgba8();
+  let image = image::load_from_memory(icon).expect("[Kuplung] Failed to open icon path!").to_rgba8();
   let (icon_width, icon_height) = image.dimensions();
 
   let egui_options = eframe::NativeOptions {
@@ -74,14 +74,12 @@ impl KuplungApp {
 impl eframe::App for KuplungApp {
   fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
     self.manager_ui.render(ctx, frame);
-    self.manager_rendering.as_mut().unwrap().update(ctx, frame);
-    self.manager_fractals.as_mut().unwrap().update(ctx, frame);
+    if self.manager_ui.show_viewer { self.manager_rendering.as_mut().unwrap().update(ctx, frame); }
+    if self.manager_ui.show_fractals { self.manager_fractals.as_mut().unwrap().update(ctx, frame); }
   }
 
   fn on_exit(&mut self, gl: Option<&glow::Context>) {
-    if let Some(manager_rendering) = &mut self.manager_rendering {
-      manager_rendering.on_exit(gl);
-    }
+    self.manager_ui.on_exit();
     if let Some(manager_rendering) = &mut self.manager_rendering {
       manager_rendering.on_exit(gl);
     }

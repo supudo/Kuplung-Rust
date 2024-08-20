@@ -6,6 +6,7 @@ use egui_glow::glow;
 
 use log::info;
 use crate::rendering::triangler::Triangler;
+use crate::settings::configuration;
 
 pub struct RenderingManager {
   show_triangler: bool,
@@ -46,10 +47,13 @@ impl RenderingManager {
 
 impl eframe::App for RenderingManager {
   fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-    egui::CentralPanel::default().show(ctx, |ui| {
-      egui::ScrollArea::both()
-        .auto_shrink(false)
-        .show(ui, |ui| {
+    egui::Window::new("Viewer")
+      .id(egui::Id::new("window_viewer"))
+      .resizable(true)
+      .enabled(true)
+      .default_pos([60.0, 60.0])
+      .default_size([configuration::WINDOW_POSITION_WIDTH_VIEWER, configuration::WINDOW_POSITION_HEIGHT_VIEWER])
+      .show(ctx, |ui| {
           ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 0.0;
             ui.label("The triangler is being painted using ");
@@ -63,7 +67,6 @@ impl eframe::App for RenderingManager {
           });
           ui.label("Drag to rotate!");
         });
-    });
   }
 
   fn on_exit(&mut self, gl: Option<&glow::Context>) {

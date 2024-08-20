@@ -1,5 +1,3 @@
-// https://aimlesslygoingforward.com/blog/2016/09/27/mandelbrot-using-shaders-rust/
-
 use eframe::egui_glow;
 use eframe::glow::HasContext;
 use egui_glow::glow;
@@ -9,13 +7,10 @@ use crate::rendering::gl_utils;
 use crate::settings::configuration;
 
 #[rustfmt::skip]
-pub static VERTEX_DATA: [f32; 30] = [
-    -1.0,  1.0,  1.0,  0.0,  0.0,
-     1.0,  1.0,  0.0,  1.0,  0.0,
-    -1.0, -1.0,  0.0,  0.0,  1.0,
-    -1.0, -1.0,  1.0,  0.0,  0.0,
-     1.0,  1.0,  0.0,  1.0,  0.0,
-     1.0, -1.0,  0.0,  0.0,  1.0,
+pub static VERTEX_DATA: [f32; 15] = [
+    -0.5, -0.5,  1.0,  0.0,  0.0,
+    0.5, -0.5,  0.0,  1.0,  0.0,
+    0.0,  0.5,  0.0,  0.0,  1.0,
 ];
 
 pub struct Mandelbrot {
@@ -37,8 +32,8 @@ impl Mandelbrot {
                 return None;
             }
 
-            let shader_vertex = gl_utils::create_shader(&program, &gl, shader_version, glow::VERTEX_SHADER, "assets/shaders/fractal_mandelbrot.vert");
-            let shader_fragment = gl_utils::create_shader(&program, &gl, shader_version, glow::FRAGMENT_SHADER, "assets/shaders/fractal_mandelbrot.frag");
+            let shader_vertex = gl_utils::create_shader(&program, &gl, shader_version, glow::VERTEX_SHADER, "assets/shaders/triangle.vert");
+            let shader_fragment = gl_utils::create_shader(&program, &gl, shader_version, glow::FRAGMENT_SHADER, "assets/shaders/triangle.frag");
 
             gl.link_program(program);
             assert!(gl.get_program_link_status(program), "{}", gl.get_program_info_log(program));
