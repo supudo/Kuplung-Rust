@@ -73,9 +73,6 @@ impl Mandelbrot {
 
   pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32, iterations: f32) {
     unsafe {
-      gl.clear_color(configuration::GL_CLEAR_COLOR_R, configuration::GL_CLEAR_COLOR_G, configuration::GL_CLEAR_COLOR_B, configuration::GL_CLEAR_COLOR_A);
-      gl.clear(glow::COLOR_BUFFER_BIT);
-
       gl.use_program(Some(self.gl_Program));
       gl.bind_vertex_array(Some(self.gl_VAO));
 
@@ -83,7 +80,7 @@ impl Mandelbrot {
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_height").as_ref(), screen_height);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), iterations);
 
-      gl.draw_elements(glow::TRIANGLES, 6, glow::UNSIGNED_INT, 0);
+      gl.draw_elements(glow::TRIANGLES, MANDELBROT_INDICES.len() as i32, glow::UNSIGNED_INT, 0);
 
       gl.bind_vertex_array(None);
     }

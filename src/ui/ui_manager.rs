@@ -96,6 +96,8 @@ impl UIManager {
 
     // main menu
     egui::menu::bar(ui, |ui| {
+      self.show_theme(ui);
+      ui.separator();
       ui.menu_button("File", |ui| {
         if ui.add(egui::Button::new("🗋 New").shortcut_text(ui.ctx().format_shortcut(&shortcut_new))).on_hover_text("New scene").clicked() { self.toggle_dialog_new(ui); }
         if ui.add(egui::Button::new("🗁 Open").shortcut_text(ui.ctx().format_shortcut(&shortcut_open))).on_hover_text("Open existing scene").clicked() { self.toggle_dialog_open(ui); }
@@ -119,8 +121,6 @@ impl UIManager {
         ui.separator();
         if ui.button("About Kuplung").clicked() { self.toggle_about(ui); }
       });
-      ui.separator();
-      self.show_theme(ui);
     });
   }
 
