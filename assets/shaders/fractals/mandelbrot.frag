@@ -5,21 +5,15 @@ in float fs_window_width;
 in float fs_window_height;
 flat in int fs_iterations;
 
+uniform bool u_black_and_white;
+
 out vec4 FragColor;
 
 vec4 mandelbrot_color(vec4 v_position);
 vec3 hsv2rgb(vec3 c);
 
 void main() {
-    //FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-    //FragColor = vec4(1.0, (mod(gl_FragCoord.y, 256) / 256), 1.0, 1.0);
-    FragColor = mandelbrot_color(fs_position);
-}
-
-vec4 mandelbrot_color(vec4 vpos) {
-    vec4 resultColor = vec4(0.0);
-
-    vec2 c = vpos.xy / 1 * 4.0 - 2.0;
+    vec2 c = fs_position.xy / 1 * 4.0 - 2.0;
     vec2 z = c;
     float i;
     for (i = 0; i < fs_iterations; i++) {
@@ -30,14 +24,17 @@ vec4 mandelbrot_color(vec4 vpos) {
     }
 
     if (i == fs_iterations) {
-        resultColor = vec4(0.0, 0.0, 0.0, 1.0);
+        FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
     else {
         float val = i / float(fs_iterations);
-        //resultColor = vec4(val, val, val, 1.0);
-        resultColor = vec4(hsv2rgb(vec3(val, 1.0, 1.0)), 1.0);
+        if (u_black_and_white) {
+            FragColor = vec4(hsv2rgb(vec3(val, 1.0, 1.0)), 1.0);
+        }
+        else {
+            FragColor = vec4(val, val, val, 1.0);
+        }
     }
-    return resultColor;
 }
 
 vec3 hsv2rgb(vec3 c) {

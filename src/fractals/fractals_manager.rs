@@ -17,6 +17,7 @@ pub struct FractalsManager {
   fractal_mandelbrot: Arc<Mutex<Mandelbrot>>,
   fractal_julia: Arc<Mutex<Julia>>,
   option_mandelbrot_iterations: i32,
+  option_mandelbrot_blackandwhite: bool,
   option_julia_iterations: i32,
 }
 
@@ -32,6 +33,7 @@ impl FractalsManager {
       fractal_mandelbrot: Arc::new(Mutex::new(Mandelbrot::new(gl)?)),
       fractal_julia: Arc::new(Mutex::new(Julia::new(gl)?)),
       option_mandelbrot_iterations: 100,
+      option_mandelbrot_blackandwhite: false,
       option_julia_iterations: 256,
     };
 
@@ -41,19 +43,23 @@ impl FractalsManager {
 
   fn paint_mandelbrot(&mut self, ui: &mut Ui) {
     ui.label("Mandelbrot fractal");
+    ui.separator();
     ui.horizontal(|ui| {
+      ui.checkbox(&mut self.option_mandelbrot_blackandwhite, "Black and White");
+      ui.separator();
       ui.label("Iterations:");
       ui.add(egui::DragValue::new(&mut self.option_mandelbrot_iterations).speed(1.0));
     });
     ui.separator();
     let iterations = self.option_mandelbrot_iterations;
+    let black_and_white = self.option_mandelbrot_blackandwhite;
     egui::Frame::canvas(ui.style()).show(ui, |ui| {
       let window_width: f32 = ui.available_size().x;
       let window_height: f32 = ui.available_size().y;
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations);
+        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations, black_and_white);
       });
       let callback = egui::PaintCallback {
         rect,
@@ -65,6 +71,7 @@ impl FractalsManager {
 
   fn paint_julia(&mut self, ui: &mut Ui) {
     ui.label("Julia fractal");
+    ui.separator();
     ui.horizontal(|ui| {
       ui.label("Iterations:");
       ui.add(egui::DragValue::new(&mut self.option_julia_iterations).speed(1.0));

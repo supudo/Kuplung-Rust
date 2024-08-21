@@ -70,7 +70,7 @@ impl Mandelbrot {
     }
   }
 
-  pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32, iterations: i32) {
+  pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32, iterations: i32, black_and_white: bool) {
     unsafe {
       gl.use_program(Some(self.gl_Program));
       gl.bind_vertex_array(Some(self.gl_VAO));
@@ -78,6 +78,12 @@ impl Mandelbrot {
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_width").as_ref(), screen_width);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_height").as_ref(), screen_height);
       gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), iterations);
+      if black_and_white {
+        gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 0);
+      }
+      else {
+        gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 1);
+      }
 
       gl.draw_elements(glow::TRIANGLES, MANDELBROT_INDICES.len() as i32, glow::UNSIGNED_INT, 0);
 

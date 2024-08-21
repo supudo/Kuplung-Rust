@@ -12,14 +12,6 @@ vec4 julia_color(vec4 v_position);
 vec3 hsv2rgb(vec3 c);
 
 void main() {
-    //FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-    //FragColor = vec4(1.0, (mod(gl_FragCoord.y, 256) / 256), 1.0, 1.0);
-    FragColor = julia_color(fs_position);
-}
-
-vec4 julia_color(vec4 vpos) {
-    vec4 resultColor = vec4(0.0);
-
     vec2 z = fs_color;
     int i;
     for (i = fs_iterations; i != 0; i--) {
@@ -37,8 +29,7 @@ vec4 julia_color(vec4 vpos) {
     float green = 0.0;
     float blue = i == 0 ? 0.0 : conv;
 
-    resultColor = vec4(red, green, blue, 1.0);
-    return resultColor;
+    FragColor = vec4(red, green, blue, 1.0);
 }
 
 vec3 hsv2rgb(vec3 c) {
