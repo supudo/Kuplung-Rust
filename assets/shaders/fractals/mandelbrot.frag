@@ -3,7 +3,7 @@
 in vec4 fs_position;
 in float fs_window_width;
 in float fs_window_height;
-in float fs_iterations;
+flat in int fs_iterations;
 
 out vec4 FragColor;
 
@@ -17,8 +17,9 @@ void main() {
 }
 
 vec4 mandelbrot_color(vec4 vpos) {
-    vec2 c = vpos.xy / 1 * 4.0 - 2.0;
+    vec4 resultColor = vec4(0.0);
 
+    vec2 c = vpos.xy / 1 * 4.0 - 2.0;
     vec2 z = c;
     float i;
     for (i = 0; i < fs_iterations; i++) {
@@ -28,7 +29,6 @@ vec4 mandelbrot_color(vec4 vpos) {
         }
     }
 
-    vec4 resultColor = vec4(0.0);
     if (i == fs_iterations) {
         resultColor = vec4(0.0, 0.0, 0.0, 1.0);
     }

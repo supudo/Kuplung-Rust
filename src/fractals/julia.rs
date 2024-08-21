@@ -5,19 +5,20 @@ use eframe::glow::HasContext;
 use egui_glow::glow;
 use log::error;
 use crate::rendering::gl_utils;
+extern crate nalgebra_glm as glm;
 
 #[rustfmt::skip]
-pub static MANDELBROT_VERTICES:[f32; 12] = [
-   1.0,  1.0, 0.0,   // top right
-   1.0, -0.5, 0.0,   // bottom right
-  -1.0, -0.5, 0.0,   // bottom left
-  -1.0,  1.0, 0.0    // top left
+pub static JULIA_VERTICES:[f32; 12] = [
+   1.0,  1.0, 0.0, // top right
+   1.0, -0.5, 0.0, // bottom right
+  -1.0, -0.5, 0.0, // bottom left
+  -1.0,  1.0, 0.0  // top left
 ];
 
 #[rustfmt::skip]
-pub static MANDELBROT_INDICES: [i32; 6] = [ 0, 1, 3, 1, 2, 3 ];
+pub static JULIA_INDICES: [i32; 6] = [ 0, 1, 3, 1, 2, 3 ];
 
-pub struct Mandelbrot {
+pub struct Julia {
   gl_Program: glow::Program,
   gl_VAO: glow::VertexArray,
   vbo_Vertices: glow::Buffer,
@@ -25,19 +26,19 @@ pub struct Mandelbrot {
 }
 
 #[allow(unsafe_code)]
-impl Mandelbrot {
+impl Julia {
   pub fn new(gl: &glow::Context) -> Option<Self> {
     use glow::HasContext as _;
     unsafe {
-      let gl_Program = gl.create_program().expect("[Kuplung] [Mandelbrot] Cannot create program!");
+      let gl_Program = gl.create_program().expect("[Kuplung] [Julia] Cannot create program!");
 
-      let shader_vertex = gl_utils::create_shader(&gl_Program, &gl, glow::VERTEX_SHADER, "assets/shaders/fractals/mandelbrot.vert");
-      let shader_fragment = gl_utils::create_shader(&gl_Program, &gl, glow::FRAGMENT_SHADER, "assets/shaders/fractals/mandelbrot.frag");
+      let shader_vertex = gl_utils::create_shader(&gl_Program, &gl, glow::VERTEX_SHADER, "assets/shaders/fractals/julia.vert");
+      let shader_fragment = gl_utils::create_shader(&gl_Program, &gl, glow::FRAGMENT_SHADER, "assets/shaders/fractals/julia.frag");
 
       gl.link_program(gl_Program);
       if !gl.get_program_link_status(gl_Program) {
-        error!("[Kuplung] [Mandelbrot] Program cannot be linked! {}", gl.get_program_info_log(gl_Program));
-        panic!("[Kuplung] [Mandelbrot] Program cannot be linked! {}", gl.get_program_info_log(gl_Program));
+        error!("[Kuplung] [Julia] Program cannot be linked! {}", gl.get_program_info_log(gl_Program));
+        panic!("[Kuplung] [Julia] Program cannot be linked! {}", gl.get_program_info_log(gl_Program));
       }
 
       gl.detach_shader(gl_Program, shader_vertex);
@@ -45,16 +46,16 @@ impl Mandelbrot {
       gl.detach_shader(gl_Program, shader_fragment);
       gl.delete_shader(shader_fragment);
 
-      let gl_VAO = gl.create_vertex_array().expect("[Kuplung] [Mandelbrot] Cannot create vertex array!");
+      let gl_VAO = gl.create_vertex_array().expect("[Kuplung] [Julia] Cannot create vertex array!");
       gl.bind_vertex_array(Some(gl_VAO));
 
-      let vbo_Vertices = gl.create_buffer().expect("[Kuplung] [Mandelbrot] Cannot create vertex buffer!");
+      let vbo_Vertices = gl.create_buffer().expect("[Kuplung] [Julia] Cannot create vertex buffer!");
       gl.bind_buffer(glow::ARRAY_BUFFER, Some(vbo_Vertices));
-      gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, bytemuck::cast_slice(&MANDELBROT_VERTICES[..]), glow::STATIC_DRAW);
+      gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, bytemuck::cast_slice(&JULIA_VERTICES[..]), glow::STATIC_DRAW);
 
-      let vbo_Indices = gl.create_buffer().expect("[Kuplung] [Mandelbrot] Cannot create indices buffer!");
+      let vbo_Indices = gl.create_buffer().expect("[Kuplung] [Julia] Cannot create indices buffer!");
       gl.bind_buffer(glow::ELEMENT_ARRAY_BUFFER, Some(vbo_Indices));
-      gl.buffer_data_u8_slice(glow::ELEMENT_ARRAY_BUFFER, bytemuck::cast_slice(&MANDELBROT_INDICES[..]), glow::STATIC_DRAW);
+      gl.buffer_data_u8_slice(glow::ELEMENT_ARRAY_BUFFER, bytemuck::cast_slice(&JULIA_INDICES[..]), glow::STATIC_DRAW);
 
       gl.vertex_attrib_pointer_f32(0, 3, glow::FLOAT, false, 0, 0);
       gl.enable_vertex_attrib_array(0);
@@ -78,8 +79,9 @@ impl Mandelbrot {
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_width").as_ref(), screen_width);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_height").as_ref(), screen_height);
       gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), iterations);
+      gl.uniform_matrix_3_f32_slice(gl.get_uniform_location(self.gl_Program, "u_world_view").as_ref(), false, glm::Mat3x3::identity().as_slice().try_into().unwrap());
 
-      gl.draw_elements(glow::TRIANGLES, MANDELBROT_INDICES.len() as i32, glow::UNSIGNED_INT, 0);
+      gl.draw_elements(glow::TRIANGLES, JULIA_INDICES.len() as i32, glow::UNSIGNED_INT, 0);
 
       gl.bind_vertex_array(None);
     }

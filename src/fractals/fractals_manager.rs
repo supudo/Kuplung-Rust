@@ -6,13 +6,16 @@ use egui::Ui;
 use egui_glow::glow;
 
 use log::info;
+use crate::fractals::julia::Julia;
 use crate::fractals::mandelbrot::Mandelbrot;
 use crate::settings::configuration;
 
 pub struct FractalsManager {
   pub show_fractals: bool,
   show_mandelbrot: bool,
+  show_julia: bool,
   fractal_mandelbrot: Arc<Mutex<Mandelbrot>>,
+  fractal_julia: Arc<Mutex<Julia>>,
 }
 
 impl FractalsManager {
@@ -22,8 +25,10 @@ impl FractalsManager {
     let gl = cc.gl.as_ref()?;
     let this = Self {
       show_fractals: false,
-      show_mandelbrot: true,
+      show_mandelbrot: false,
+      show_julia: true,
       fractal_mandelbrot: Arc::new(Mutex::new(Mandelbrot::new(gl)?)),
+      fractal_julia: Arc::new(Mutex::new(Julia::new(gl)?)),
     };
 
     info!("[Kuplung] New FractalsManager finished.");
@@ -41,7 +46,28 @@ impl FractalsManager {
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, 100.0);
+        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, 100);
+      });
+      let callback = egui::PaintCallback {
+        rect,
+        callback: Arc::new(cb),
+      };
+      ui.painter().add(callback);
+    });
+  }
+
+  fn paint_julia(&mut self, ui: &mut Ui) {
+    ui.horizontal(|ui| {
+      ui.spacing_mut().item_spacing.x = 0.0;
+      ui.label("Julia fractal");
+    });
+    egui::Frame::canvas(ui.style()).show(ui, |ui| {
+      let window_width: f32 = ui.available_size().x;
+      let window_height: f32 = ui.available_size().y;
+      let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
+      let fractal_julia = self.fractal_julia.clone();
+      let cb = egui_glow::CallbackFn::new(move |_, painter| {
+        fractal_julia.lock().paint(painter.gl(), window_width, window_height, 256);
       });
       let callback = egui::PaintCallback {
         rect,
@@ -71,19 +97,27 @@ impl eframe::App for FractalsManager {
           ui.menu_button("Fractals", |ui| {
             if ui.button("Mandelbrot").clicked() {
               ui.close_menu();
+              self.show_julia = false;
               self.show_mandelbrot = true;
+            }
+            if ui.button("Julia").clicked() {
+              ui.close_menu();
+              self.show_mandelbrot = false;
+              self.show_julia = true;
             }
           });
         });
         ui.separator();
         if self.show_mandelbrot { self.paint_mandelbrot(ui); }
-        if !self.show_mandelbrot { ui.label("Select fractal from the menu."); }
+        if self.show_julia { self.paint_julia(ui); }
+        if !self.show_mandelbrot && !self.show_julia { ui.label("Select fractal from the menu."); }
       });
   }
 
   fn on_exit(&mut self, gl: Option<&glow::Context>) {
     if let Some(gl) = gl {
       self.fractal_mandelbrot.lock().destroy(gl);
+      self.fractal_julia.lock().destroy(gl);
     }
   }
 }
