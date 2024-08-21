@@ -9,10 +9,10 @@ extern crate nalgebra_glm as glm;
 
 #[rustfmt::skip]
 pub static JULIA_VERTICES:[f32; 12] = [
-   1.0,  1.0, 0.0, // top right
-   1.0, -0.5, 0.0, // bottom right
-  -1.0, -0.5, 0.0, // bottom left
-  -1.0,  1.0, 0.0  // top left
+   1.0,  1.0, 0.0,   // top right
+   1.0, -1.0, 0.0,   // bottom right
+  -1.0, -1.0, 0.0,   // bottom left
+  -1.0,  1.0, 0.0    // top left
 ];
 
 #[rustfmt::skip]

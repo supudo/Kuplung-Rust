@@ -12,6 +12,7 @@ pub struct ComponentLog {
 impl ComponentLog {
   pub fn new() -> Self {
     info!("[Kuplung] [UI] [Component] Initializing Log...");
+
     let this = Self {
       buffer_filter: "".to_string(),
       buffer_log: "".to_string(),

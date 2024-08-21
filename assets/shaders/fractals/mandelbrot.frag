@@ -13,7 +13,7 @@ vec4 mandelbrot_color(vec4 v_position);
 vec3 hsv2rgb(vec3 c);
 
 void main() {
-    vec2 c = fs_position.xy / 1 * 4.0 - 2.0;
+    vec2 c = fs_position.xy / 1.5 * 2.0 - 0.6;
     vec2 z = c;
     float i;
     for (i = 0; i < fs_iterations; i++) {

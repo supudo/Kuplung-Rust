@@ -9,8 +9,8 @@ use crate::rendering::gl_utils;
 #[rustfmt::skip]
 pub static MANDELBROT_VERTICES:[f32; 12] = [
    1.0,  1.0, 0.0,   // top right
-   1.0, -0.5, 0.0,   // bottom right
-  -1.0, -0.5, 0.0,   // bottom left
+   1.0, -1.0, 0.0,   // bottom right
+  -1.0, -1.0, 0.0,   // bottom left
   -1.0,  1.0, 0.0    // top left
 ];
 
