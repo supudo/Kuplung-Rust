@@ -69,17 +69,18 @@ impl FractalsManager {
         });
     });
     ui.end_row();
-    //ui.separator();
     let iterations = self.option_mandelbrot_iterations;
     let black_and_white = self.option_mandelbrot_blackandwhite;
-    let mut color_palette = self.option_mandelbrot_colorpalette;
+    let color_palette = self.option_mandelbrot_colorpalette;
+    let zoom_center = nalgebra_glm::Vec2::identity();
+    let zoom_size = 1;
     egui::Frame::canvas(ui.style()).show(ui, |ui| {
       let window_width: f32 = ui.available_size().x;
       let window_height: f32 = ui.available_size().y;
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations, black_and_white, color_palette);
+        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations, black_and_white, color_palette, zoom_center, zoom_size);
       });
       let callback = egui::PaintCallback {
         rect,
