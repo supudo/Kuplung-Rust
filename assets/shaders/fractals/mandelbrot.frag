@@ -95,7 +95,7 @@ vec4 mandelbrot_color_grainy(vec4 v_position) {
 
 void main() {
     if (u_color_palette == 0)
-    FragColor = mandelbrot_color_normal(fs_position);
+        FragColor = mandelbrot_color_normal(fs_position);
     else
-    FragColor = mandelbrot_color_grainy(fs_position);
+        FragColor = mandelbrot_color_grainy(fs_position);
 }
