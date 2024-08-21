@@ -1,11 +1,20 @@
+// 1. https://aimlesslygoingforward.com/blog/2016/09/27/mandelbrot-using-shaders-rust/
+// 2. https://gpfault.net/posts/mandelbrot-webgl.txt.html
+
 use std::sync::Arc;
 
 use eframe::egui_glow;
 use egui::mutex::Mutex;
-use egui::Ui;
+use egui::{TextBuffer, Ui};
 use egui_glow::glow;
 
 use log::info;
+
+extern crate strum_macros;
+extern crate strum;
+use strum::IntoEnumIterator;
+use strum_macros::{AsRefStr, EnumIter};
+
 use crate::fractals::julia::Julia;
 use crate::fractals::mandelbrot::Mandelbrot;
 use crate::settings::configuration;
@@ -18,6 +27,7 @@ pub struct FractalsManager {
   fractal_julia: Arc<Mutex<Julia>>,
   option_mandelbrot_iterations: i32,
   option_mandelbrot_blackandwhite: bool,
+  option_mandelbrot_colorpalette: i32,
   option_julia_iterations: i32,
 }
 
@@ -34,6 +44,7 @@ impl FractalsManager {
       fractal_julia: Arc::new(Mutex::new(Julia::new(gl)?)),
       option_mandelbrot_iterations: 100,
       option_mandelbrot_blackandwhite: false,
+      option_mandelbrot_colorpalette: 0,
       option_julia_iterations: 256,
     };
 
@@ -49,17 +60,26 @@ impl FractalsManager {
       ui.separator();
       ui.label("Iterations:");
       ui.add(egui::DragValue::new(&mut self.option_mandelbrot_iterations).speed(1.0));
+      ui.separator();
+      egui::ComboBox::from_label("Color palette")
+        .selected_text(format!("{}", get_mcp(usize::try_from(self.option_mandelbrot_colorpalette).unwrap())))
+        .show_ui(ui, |ui| {
+          ui.selectable_value(&mut self.option_mandelbrot_colorpalette, 0, "Normal");
+          ui.selectable_value(&mut self.option_mandelbrot_colorpalette, 1, "Grainy");
+        });
     });
-    ui.separator();
+    ui.end_row();
+    //ui.separator();
     let iterations = self.option_mandelbrot_iterations;
     let black_and_white = self.option_mandelbrot_blackandwhite;
+    let mut color_palette = self.option_mandelbrot_colorpalette;
     egui::Frame::canvas(ui.style()).show(ui, |ui| {
       let window_width: f32 = ui.available_size().x;
       let window_height: f32 = ui.available_size().y;
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations, black_and_white);
+        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations, black_and_white, color_palette);
       });
       let callback = egui::PaintCallback {
         rect,
@@ -137,4 +157,14 @@ impl eframe::App for FractalsManager {
       self.fractal_julia.lock().destroy(gl);
     }
   }
+}
+
+#[derive(Debug, PartialEq, EnumIter, AsRefStr)]
+enum Mandelbrot_ColorPallete {
+  Normal = 0,
+  Grainy,
+}
+
+fn get_mcp(idx: usize) -> String {
+  return Mandelbrot_ColorPallete::iter().nth(idx).unwrap().as_ref().as_str().replace('\"', "");
 }
