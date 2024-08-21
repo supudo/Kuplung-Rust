@@ -4,6 +4,10 @@
 
 Rust port of [Kuplung](https://github.com/supudo/kuplung)
 
+#### Using/Including
+
+- [egui](https://www.egui.rs/)
+
 ### License
 
 Each library uses comes with its own license. The core of the application is public domain or whatever fits them all.
