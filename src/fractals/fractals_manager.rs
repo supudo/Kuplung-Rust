@@ -29,6 +29,9 @@ pub struct FractalsManager {
   option_mandelbrot_blackandwhite: bool,
   option_mandelbrot_colorpalette: i32,
   option_julia_iterations: i32,
+  zoom_size: f32,
+  target_zoom_center: nalgebra_glm::Vec2,
+  option_zoom_center: nalgebra_glm::Vec2,
 }
 
 impl FractalsManager {
@@ -42,10 +45,13 @@ impl FractalsManager {
       show_julia: false,
       fractal_mandelbrot: Arc::new(Mutex::new(Mandelbrot::new(gl)?)),
       fractal_julia: Arc::new(Mutex::new(Julia::new(gl)?)),
-      option_mandelbrot_iterations: 100,
+      option_mandelbrot_iterations: 500,
       option_mandelbrot_blackandwhite: false,
       option_mandelbrot_colorpalette: 0,
       option_julia_iterations: 256,
+      zoom_size: 1.0,
+      target_zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
+      option_zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
     };
 
     info!("[Kuplung] New FractalsManager finished.");
@@ -69,14 +75,16 @@ impl FractalsManager {
         });
     });
     ui.end_row();
+    self.option_zoom_center.x += 0.1 * (self.target_zoom_center[0] - self.option_zoom_center.x);
+    self.option_zoom_center.y += 0.1 * (self.target_zoom_center[1] - self.option_zoom_center.y);
     let iterations = self.option_mandelbrot_iterations;
     let black_and_white = self.option_mandelbrot_blackandwhite;
     let color_palette = self.option_mandelbrot_colorpalette;
-    let zoom_center = nalgebra_glm::Vec2::identity();
-    let zoom_size = 1;
+    let zoom_center = self.option_zoom_center;
+    let zoom_size = self.zoom_size;
     egui::Frame::canvas(ui.style()).show(ui, |ui| {
-      let window_width: f32 = ui.available_size().x;
-      let window_height: f32 = ui.available_size().y;
+      let window_width: f32 = ui.available_width();
+      let window_height: f32 = ui.available_height();
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {

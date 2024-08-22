@@ -1,4 +1,5 @@
 #version 410 core
+precision highp float;
 
 in vec4 fs_position;
 uniform float u_window_width;
@@ -58,35 +59,36 @@ vec3 hsv2rgb(vec3 c) {
 // ===========================
 
 vec2 f(vec2 x, vec2 c) {
-    return mat2(x,-x.y,x.x)*x + c;
+    return mat2(x, -x.y, x.x) * x + c;
 }
 
 vec3 palette_grainy(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
-    float x = 1.0 / 3.0;
-    if (t < x) return mix(c1, c2, t/x);
-    else if (t < 2.0 * x) return mix(c2, c3, (t - x)/x);
-    else if (t < 3.0 * x) return mix(c3, c4, (t - 2.0*x)/x);
-    return c4;
-}
-
-vec3 palette_grainy2(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
     return a + b * cos(6.28318 * (c * t + d));
 }
 
 vec4 mandelbrot_color_grainy(vec4 v_position) {
     vec2 uv = v_position.xy / vec2(u_window_width, u_window_height);
-    vec2 c = u_zoomCenter + (uv * 4.0 - vec2(2.0)) * (u_zoomSize / 4.0);
-    vec2 z = vec2(0.0);
+    vec2 c0 = u_zoomCenter + (uv * 4.0 - vec2(2.0)) * (u_zoomSize / 4.0);
+    vec2 x = vec2(0.0);
     bool escaped = false;
     int iterations;
     for (int i = 0; i < 10000; i++) {
-        z = f(z, c);
-        if (length(z) > 2.0) {
+        if (i > u_iterations) break;
+        iterations = i;
+        x = f(x, c0);
+        if (length(x) > 2.0) {
             escaped = true;
             break;
         }
     }
-    return escaped ? vec4(palette_grainy(float(iterations) / float(u_iterations), vec3(0.02, 0.02, 0.03), vec3(0.1, 0.2, 0.3), vec3(0.0, 0.3, 0.2), vec3(0.0, 0.5, 0.8)), 1.0) : vec4(vec3(0.3, 0.5, 0.8), 1.0);
+    float t = float(iterations) / float(u_iterations);
+    vec3 a = vec3(0.0);
+    vec3 b = vec3(0.59, 0.55, 0.75);
+    vec3 c = vec3(0.1, 0.2, 0.3);
+    vec3 d = vec3(0.75);
+    vec3 pallete_color = palette_grainy(t, a, b, c, d);
+    vec4 bg_color = vec4(0.85, 0.99, 1.0, 1.0);
+    return escaped ? vec4(pallete_color, 1.0) : bg_color;
 }
 
 // ===========================
