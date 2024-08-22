@@ -3,7 +3,7 @@ use std::sync::Arc;
 use eframe::egui_glow;
 use egui::mutex::Mutex;
 use egui_glow::glow;
-
+use crate::do_log;
 use crate::rendering::triangler::Triangler;
 use crate::settings::{configuration, kuplung_logger};
 
@@ -15,7 +15,7 @@ pub struct RenderingManager {
 
 impl RenderingManager {
   pub fn new<'a>(cc: &'a eframe::CreationContext<'a>) -> Option<Self> {
-    kuplung_logger::log_info("[Kuplung] New RenderingManager...");
+    do_log!("[Kuplung] New RenderingManager...");
 
     let gl = cc.gl.as_ref()?;
     let this = Self {
@@ -24,7 +24,7 @@ impl RenderingManager {
       angle: 0.0,
     };
 
-    kuplung_logger::log_info("[Kuplung] New RenderingManager finished.");
+    do_log!("[Kuplung] New RenderingManager finished.");
     Some(this)
   }
 

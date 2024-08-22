@@ -1,5 +1,6 @@
 use clipboard::{ClipboardContext, ClipboardProvider};
 use egui::{Context, TextEdit};
+use crate::do_log;
 use crate::settings::{configuration, kuplung_logger};
 
 #[derive(Default)]
@@ -9,12 +10,12 @@ pub struct ComponentLog {
 
 impl ComponentLog {
   pub fn new() -> Self {
-    kuplung_logger::log_info("[Kuplung] [UI] [Component] Initializing Log...");
+    do_log!("[Kuplung] [UI] [Component] Initializing Log...");
 
     let this = Self {
       buffer_filter: "".to_string(),
     };
-    kuplung_logger::log_info("[Kuplung] [UI] [Component] Log initialized.");
+    do_log!("[Kuplung] [UI] [Component] Log initialized.");
     this
   }
 
@@ -42,14 +43,14 @@ impl ComponentLog {
           .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
           .rounding(ui.visuals().widgets.noninteractive.rounding)
           .show(ui, |ui| {
-            ui.add_sized(ui.available_size(), TextEdit::multiline(&mut kuplung_logger::get_info()));
+            ui.add_sized(ui.available_size(), TextEdit::multiline(&mut kuplung_logger::get_log()));
           });
       });
   }
 
   fn copy_log_text(&mut self) {
     let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-    ctx.set_contents(kuplung_logger::get_info().to_string()).unwrap();
+    ctx.set_contents(kuplung_logger::get_log().to_string()).unwrap();
   }
 
   fn clear_log_text(&mut self) { kuplung_logger::clear_log(); }

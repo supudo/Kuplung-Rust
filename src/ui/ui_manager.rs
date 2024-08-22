@@ -1,4 +1,5 @@
 use egui::{Context, Modifiers, Ui};
+use crate::do_log;
 use crate::settings::kuplung_logger;
 use crate::ui::dialogs::options;
 use crate::ui::panel_backend;
@@ -27,7 +28,7 @@ pub struct UIManager {
 
 impl UIManager {
   pub fn new() -> Self {
-    kuplung_logger::log_info("[Kuplung] [UI] Initializing UI...");
+    do_log!("[Kuplung] [UI] Initializing UI...");
     let this = Self {
       dark_mode: false,
       show_backend: false,
@@ -40,7 +41,7 @@ impl UIManager {
       show_fractals: false,
       show_toys: false,
     };
-    kuplung_logger::log_info("[Kuplung] [UI] UI initialized.");
+    do_log!("[Kuplung] [UI] UI initialized.");
     this
   }
 

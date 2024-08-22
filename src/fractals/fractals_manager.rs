@@ -15,6 +15,7 @@ use strum_macros::{AsRefStr, EnumIter};
 
 use crate::fractals::julia::Julia;
 use crate::fractals::mandelbrot::Mandelbrot;
+use crate::do_log;
 use crate::settings::{configuration, kuplung_logger};
 
 pub struct FractalsManager {
@@ -34,7 +35,7 @@ pub struct FractalsManager {
 
 impl FractalsManager {
   pub fn new<'a>(cc: &'a eframe::CreationContext<'a>) -> Option<Self> {
-    kuplung_logger::log_info("[Kuplung] New FractalsManager...");
+    do_log!("[Kuplung] New FractalsManager...");
 
     let gl = cc.gl.as_ref()?;
     let this = Self {
@@ -52,7 +53,7 @@ impl FractalsManager {
       option_zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
     };
 
-    kuplung_logger::log_info("[Kuplung] New FractalsManager finished.");
+    do_log!("[Kuplung] New FractalsManager finished.");
     Some(this)
   }
 

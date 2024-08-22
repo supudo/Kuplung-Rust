@@ -4,6 +4,7 @@ use eframe::epaint::text::FontData;
 use egui::ViewportBuilder;
 use env_logger::Env;
 use crate::fractals::fractals_manager;
+use crate::do_log;
 use crate::rendering::rendering_manager;
 use crate::settings::{configuration, kuplung_logger};
 use crate::ui::ui_manager;
@@ -14,7 +15,7 @@ pub fn main() -> eframe::Result {
     .write_style_or(configuration::KUPLUNG_LOG_STYLE, configuration::KUPLUNG_LOG_STYLE_VALUE);
   env_logger::init_from_env(env);
 
-  kuplung_logger::log_info("[Kuplung] Initializing Kuplung...");
+  do_log!("[Kuplung] Initializing Kuplung...");
 
   let icon = include_bytes!(concat!(env!("OUT_DIR"), "/assets/Kuplung.png"));
   let image = image::load_from_memory(icon).expect("[Kuplung] Failed to open icon path!").to_rgba8();
@@ -41,7 +42,7 @@ pub fn main() -> eframe::Result {
     ..Default::default()
   };
   let egui_result = eframe::run_native(configuration::APP_TITLE, egui_options, Box::new(|cc| Ok(Box::new(KuplungApp::new(cc)))));
-  kuplung_logger::log_info("[Kuplung] Window initialized.");
+  do_log!("[Kuplung] Window initialized.");
   egui_result
 }
 
@@ -73,7 +74,7 @@ impl KuplungApp {
       manager_fractals,
     };
 
-    kuplung_logger::log_info("[Kuplung] egui initialized.");
+    do_log!("[Kuplung] egui initialized.");
     this
   }
 }
