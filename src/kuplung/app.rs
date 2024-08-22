@@ -3,10 +3,9 @@ use eframe::egui_glow::ShaderVersion;
 use eframe::epaint::text::FontData;
 use egui::ViewportBuilder;
 use env_logger::Env;
-use log::info;
 use crate::fractals::fractals_manager;
 use crate::rendering::rendering_manager;
-use crate::settings::configuration;
+use crate::settings::{configuration, kuplung_logger};
 use crate::ui::ui_manager;
 
 pub fn main() -> eframe::Result {
@@ -15,7 +14,7 @@ pub fn main() -> eframe::Result {
     .write_style_or(configuration::KUPLUNG_LOG_STYLE, configuration::KUPLUNG_LOG_STYLE_VALUE);
   env_logger::init_from_env(env);
 
-  info!("[Kuplung] Initializing Kuplung...");
+  kuplung_logger::log_info("[Kuplung] Initializing Kuplung...");
 
   let icon = include_bytes!(concat!(env!("OUT_DIR"), "/assets/Kuplung.png"));
   let image = image::load_from_memory(icon).expect("[Kuplung] Failed to open icon path!").to_rgba8();
@@ -42,12 +41,12 @@ pub fn main() -> eframe::Result {
     ..Default::default()
   };
   let egui_result = eframe::run_native(configuration::APP_TITLE, egui_options, Box::new(|cc| Ok(Box::new(KuplungApp::new(cc)))));
-  info!("[Kuplung] Window initialized.");
+  kuplung_logger::log_info("[Kuplung] Window initialized.");
   egui_result
 }
 
 #[derive(Default)]
-struct KuplungApp {
+pub struct KuplungApp {
   manager_ui: ui_manager::UIManager,
   manager_rendering: Option<rendering_manager::RenderingManager>,
   manager_fractals: Option<fractals_manager::FractalsManager>,
@@ -74,7 +73,7 @@ impl KuplungApp {
       manager_fractals,
     };
 
-    info!("[Kuplung] egui initialized.");
+    kuplung_logger::log_info("[Kuplung] egui initialized.");
     this
   }
 }

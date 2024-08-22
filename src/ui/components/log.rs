@@ -1,33 +1,21 @@
 use clipboard::{ClipboardContext, ClipboardProvider};
 use egui::{Context, TextEdit};
-use log::info;
-use crate::settings::configuration;
+use crate::settings::{configuration, kuplung_logger};
 
 #[derive(Default)]
 pub struct ComponentLog {
   buffer_filter: String,
-  buffer_log: String,
 }
 
 impl ComponentLog {
   pub fn new() -> Self {
-    info!("[Kuplung] [UI] [Component] Initializing Log...");
+    kuplung_logger::log_info("[Kuplung] [UI] [Component] Initializing Log...");
 
     let this = Self {
       buffer_filter: "".to_string(),
-      buffer_log: "".to_string(),
     };
-    info!("[Kuplung] [UI] [Component] Log initialized.");
+    kuplung_logger::log_info("[Kuplung] [UI] [Component] Log initialized.");
     this
-  }
-
-  pub fn log_info(&mut self, message: &str) {
-    if self.buffer_log.is_empty() {
-      self.buffer_log = message.to_string();
-    }
-    else {
-      self.buffer_log = format!("{}\n{}", self.buffer_log.to_string(), message);
-    }
   }
 
   pub fn render_component_log(&mut self, ctx: &Context) {
@@ -54,17 +42,17 @@ impl ComponentLog {
           .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
           .rounding(ui.visuals().widgets.noninteractive.rounding)
           .show(ui, |ui| {
-            ui.add_sized(ui.available_size(), TextEdit::multiline(&mut self.buffer_log));
+            ui.add_sized(ui.available_size(), TextEdit::multiline(&mut kuplung_logger::get_info()));
           });
       });
   }
 
   fn copy_log_text(&mut self) {
     let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-    ctx.set_contents(self.buffer_log.to_string()).unwrap();
+    ctx.set_contents(kuplung_logger::get_info().to_string()).unwrap();
   }
 
-  fn clear_log_text(&mut self) { self.buffer_log = "".to_string(); }
+  fn clear_log_text(&mut self) { kuplung_logger::clear_log(); }
 
   fn filter_log(&mut self) {}
 }

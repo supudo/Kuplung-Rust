@@ -62,7 +62,7 @@ vec2 f(vec2 x, vec2 c) {
     return mat2(x, -x.y, x.x) * x + c;
 }
 
-vec3 palette_grainy(float t, vec3 c1, vec3 c2, vec3 c3, vec3 c4) {
+vec3 palette_grainy(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
     return a + b * cos(6.28318 * (c * t + d));
 }
 

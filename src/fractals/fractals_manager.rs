@@ -8,8 +8,6 @@ use egui::mutex::Mutex;
 use egui::{TextBuffer, Ui};
 use egui_glow::glow;
 
-use log::info;
-
 extern crate strum_macros;
 extern crate strum;
 use strum::IntoEnumIterator;
@@ -17,7 +15,7 @@ use strum_macros::{AsRefStr, EnumIter};
 
 use crate::fractals::julia::Julia;
 use crate::fractals::mandelbrot::Mandelbrot;
-use crate::settings::configuration;
+use crate::settings::{configuration, kuplung_logger};
 
 pub struct FractalsManager {
   pub show_fractals: bool,
@@ -36,7 +34,7 @@ pub struct FractalsManager {
 
 impl FractalsManager {
   pub fn new<'a>(cc: &'a eframe::CreationContext<'a>) -> Option<Self> {
-    info!("[Kuplung] New FractalsManager...");
+    kuplung_logger::log_info("[Kuplung] New FractalsManager...");
 
     let gl = cc.gl.as_ref()?;
     let this = Self {
@@ -54,7 +52,7 @@ impl FractalsManager {
       option_zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
     };
 
-    info!("[Kuplung] New FractalsManager finished.");
+    kuplung_logger::log_info("[Kuplung] New FractalsManager finished.");
     Some(this)
   }
 
@@ -169,11 +167,11 @@ impl eframe::App for FractalsManager {
 }
 
 #[derive(Debug, PartialEq, EnumIter, AsRefStr)]
-enum Mandelbrot_ColorPallete {
+enum MandelbrotColorPallete {
   Normal = 0,
   Grainy,
 }
 
 fn get_mcp(idx: usize) -> String {
-  return Mandelbrot_ColorPallete::iter().nth(idx).unwrap().as_ref().as_str().replace('\"', "");
+  return MandelbrotColorPallete::iter().nth(idx).unwrap().as_ref().as_str().replace('\"', "");
 }

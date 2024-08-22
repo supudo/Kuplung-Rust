@@ -4,9 +4,8 @@ use eframe::egui_glow;
 use egui::mutex::Mutex;
 use egui_glow::glow;
 
-use log::info;
 use crate::rendering::triangler::Triangler;
-use crate::settings::configuration;
+use crate::settings::{configuration, kuplung_logger};
 
 pub struct RenderingManager {
   show_triangler: bool,
@@ -16,7 +15,7 @@ pub struct RenderingManager {
 
 impl RenderingManager {
   pub fn new<'a>(cc: &'a eframe::CreationContext<'a>) -> Option<Self> {
-    info!("[Kuplung] New RenderingManager...");
+    kuplung_logger::log_info("[Kuplung] New RenderingManager...");
 
     let gl = cc.gl.as_ref()?;
     let this = Self {
@@ -25,7 +24,7 @@ impl RenderingManager {
       angle: 0.0,
     };
 
-    info!("[Kuplung] New RenderingManager finished.");
+    kuplung_logger::log_info("[Kuplung] New RenderingManager finished.");
     Some(this)
   }
 
