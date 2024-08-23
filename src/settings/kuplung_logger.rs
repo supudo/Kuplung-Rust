@@ -1,4 +1,6 @@
 use std::sync::Mutex;
+use chrono::{DateTime, Utc};
+
 
 static LOG_BUFFER: Mutex<String> = Mutex::new(String::new());
 
@@ -10,8 +12,9 @@ macro_rules! do_log {
 }
 
 pub fn add_log(message: &str) {
-  log::info!("{}", message);
-  LOG_BUFFER.lock().unwrap().push_str(format!("{}\n", message).as_str());
+  let str = format!("[{}] {}\n", Utc::now().format("%H:%M:%S.%f"), message);
+  log::info!("{}" ,str);
+  LOG_BUFFER.lock().unwrap().push_str(str.as_str());
 }
 
 pub fn get_log() -> String {

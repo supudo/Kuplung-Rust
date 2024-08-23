@@ -27,7 +27,7 @@ impl ComponentLog {
       .id(egui::Id::new("component_log"))
       .resizable(true)
       .enabled(true)
-      .default_size([configuration::COMPONENT_LOG_WIDTH, configuration::COMPONENT_LOG_HEIGHT])
+      .default_size([configuration::COMPONENT_LOG_WIDTH, configuration::COMPONENT_LOG_HEIGHT + 10.0])
       .default_pos([posx, posy])
       .show(ctx, |ui| {
         ui.horizontal(|ui| {
@@ -43,7 +43,14 @@ impl ComponentLog {
           .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
           .rounding(ui.visuals().widgets.noninteractive.rounding)
           .show(ui, |ui| {
-            ui.add_sized(ui.available_size(), TextEdit::multiline(&mut kuplung_logger::get_log()));
+            egui::ScrollArea::vertical()
+              .id_source("log_buffer_output")
+              .auto_shrink([false; 2])
+              .stick_to_bottom(true)
+              .enable_scrolling(true)
+              .show(ui, |ui| {
+                ui.add_sized(ui.available_size(), TextEdit::multiline(&mut kuplung_logger::get_log()).cursor_at_end(true));
+              });
           });
       });
   }
