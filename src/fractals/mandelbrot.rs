@@ -65,7 +65,7 @@ impl Mandelbrot {
         gl_Program,
         gl_VAO,
         vbo_Vertices,
-        vbo_Indices
+        vbo_Indices,
       })
     }
   }
