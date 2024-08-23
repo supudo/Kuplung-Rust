@@ -4,15 +4,9 @@ static LOG_BUFFER: Mutex<String> = Mutex::new(String::new());
 
 #[macro_export]
 macro_rules! do_log {
-  ($value:expr) => {
-    log::info!("{}", $value);
-    kuplung_logger::add_log($value);
-  };
-  // Decompose multiple `eval`s recursively
-  (eval $e:expr, $(eval $es:expr),+) => {{
-    do_log! { eval $e }
-    do_log! { $(eval $es),+ }
-  }};
+  ($($arg:tt)*) => {{
+    kuplung_logger::add_log(std::fmt::format(format_args!($($arg)*)).as_str());
+  }}
 }
 
 pub fn add_log(message: &str) {

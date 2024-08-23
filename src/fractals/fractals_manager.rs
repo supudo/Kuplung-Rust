@@ -81,6 +81,7 @@ impl FractalsManager {
     let color_palette = self.option_mandelbrot_colorpalette;
     let zoom_center = self.option_zoom_center;
     let zoom_size = self.zoom_size;
+    do_log!("{:.8} x {:.8} = {:.8}", zoom_center.x, zoom_center.y, zoom_size);
     egui::Frame::canvas(ui.style()).show(ui, |ui| {
       let window_width: f32 = ui.available_width();
       let window_height: f32 = ui.available_height();
