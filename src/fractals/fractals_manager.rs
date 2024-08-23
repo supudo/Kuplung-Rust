@@ -28,9 +28,12 @@ pub struct FractalsManager {
   option_mandelbrot_blackandwhite: bool,
   option_mandelbrot_colorpalette: i32,
   option_julia_iterations: i32,
-  zoom_size: f32,
+  zoom_center: nalgebra_glm::Vec2,
   target_zoom_center: nalgebra_glm::Vec2,
-  option_zoom_center: nalgebra_glm::Vec2,
+  zoom_size: f32,
+  stop_zooming: bool,
+  zoom_factor: f32,
+  zoom_max_iterations: i32
 }
 
 impl FractalsManager {
@@ -48,9 +51,12 @@ impl FractalsManager {
       option_mandelbrot_blackandwhite: false,
       option_mandelbrot_colorpalette: 0,
       option_julia_iterations: 256,
-      zoom_size: 1.0,
+      zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
       target_zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
-      option_zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
+      zoom_size: 1.0,
+      stop_zooming: true,
+      zoom_factor: 1.0,
+      zoom_max_iterations: 500
     };
 
     do_log!("[Kuplung] New FractalsManager finished.");
@@ -74,21 +80,41 @@ impl FractalsManager {
         });
     });
     ui.end_row();
-    self.option_zoom_center.x += 0.1 * (self.target_zoom_center[0] - self.option_zoom_center.x);
-    self.option_zoom_center.y += 0.1 * (self.target_zoom_center[1] - self.option_zoom_center.y);
+
+    if !self.stop_zooming {
+      self.zoom_max_iterations -= 10;
+      if self.zoom_max_iterations < 50 { self.zoom_max_iterations = 50 };
+      self.zoom_size *= self.zoom_factor;
+      self.zoom_center.x += 0.1 * (self.target_zoom_center[0] - self.zoom_center.x);
+      self.zoom_center.y += 0.1 * (self.target_zoom_center[1] - self.zoom_center.y);
+    }
+    else if self.zoom_max_iterations < 500 {
+      self.zoom_max_iterations += 10;
+    }
+
     let iterations = self.option_mandelbrot_iterations;
     let black_and_white = self.option_mandelbrot_blackandwhite;
     let color_palette = self.option_mandelbrot_colorpalette;
-    let zoom_center = self.option_zoom_center;
+    let mut zoom_center = self.zoom_center;
     let zoom_size = self.zoom_size;
-    do_log!("{:.8} x {:.8} = {:.8}", zoom_center.x, zoom_center.y, zoom_size);
+    let zoom_max_iterations = self.zoom_max_iterations;
     egui::Frame::canvas(ui.style()).show(ui, |ui| {
       let window_width: f32 = ui.available_width();
       let window_height: f32 = ui.available_height();
-      let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
+      let (rect, response) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::click_and_drag());
+      if response.clicked() {
+        let clicked_pos = response.interact_pointer_pos();
+        let x_part = clicked_pos.unwrap().x / window_width;
+        let y_part = clicked_pos.unwrap().y / window_height;
+        self.target_zoom_center[0] = zoom_center[0] - zoom_size / 2.0 + x_part * zoom_size;
+        self.target_zoom_center[1] = zoom_center[1] + zoom_size / 2.0 - y_part * zoom_size;
+        self.stop_zooming = false;
+        if response.secondary_clicked() { self.zoom_factor = 0.99 } else { self.zoom_factor = 1.01 };
+      }
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations, black_and_white, color_palette, zoom_center, zoom_size);
+        do_log!("{} x {} = {} ; {}", zoom_center.x, zoom_center.y, zoom_size, zoom_max_iterations);
+        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, zoom_max_iterations, black_and_white, color_palette, zoom_center, zoom_size);
       });
       let callback = egui::PaintCallback {
         rect,

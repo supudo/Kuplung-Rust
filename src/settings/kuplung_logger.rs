@@ -1,5 +1,5 @@
 use std::sync::Mutex;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 
 
 static LOG_BUFFER: Mutex<String> = Mutex::new(String::new());
