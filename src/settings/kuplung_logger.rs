@@ -1,7 +1,6 @@
 use std::sync::Mutex;
 use chrono::Utc;
 
-
 static LOG_BUFFER: Mutex<String> = Mutex::new(String::new());
 
 #[macro_export]
@@ -24,5 +23,3 @@ pub fn get_log() -> String {
 pub fn clear_log() {
   LOG_BUFFER.lock().unwrap().clear();
 }
-
-
