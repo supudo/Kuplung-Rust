@@ -23,9 +23,9 @@ pub struct FractalsManager {
   fractal_mandelbrot: Arc<Mutex<Mandelbrot>>,
   fractal_julia: Arc<Mutex<Julia>>,
   zoom_center: nalgebra_glm::Vec2,
-  target_zoom_center: nalgebra_glm::Vec2,
+  zoom_center_target: nalgebra_glm::Vec2,
   zoom_size: f32,
-  stop_zooming: bool,
+  zoom_stop: bool,
   zoom_factor: f32,
   zoom_max_iterations: i32
 }
@@ -42,9 +42,9 @@ impl FractalsManager {
       fractal_mandelbrot: Arc::new(Mutex::new(Mandelbrot::new(gl)?)),
       fractal_julia: Arc::new(Mutex::new(Julia::new(gl)?)),
       zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
-      target_zoom_center: nalgebra_glm::Vec2::new(0.0, 0.0),
+      zoom_center_target: nalgebra_glm::Vec2::new(0.0, 0.0),
       zoom_size: 1.0,
-      stop_zooming: true,
+      zoom_stop: true,
       zoom_factor: 1.0,
       zoom_max_iterations: 500
     };
@@ -56,17 +56,15 @@ impl FractalsManager {
   fn paint_mandelbrot(&mut self, ui: &mut Ui) {
     self.fractal_mandelbrot.lock().draw_ui(ui);
 
-    if !self.stop_zooming {
+    if !self.zoom_stop {
       self.zoom_max_iterations -= 10;
       if self.zoom_max_iterations < 50 { self.zoom_max_iterations = 50 };
       self.zoom_size *= self.zoom_factor;
-      self.zoom_center.x += 0.1 * (self.target_zoom_center[0] - self.zoom_center.x);
-      self.zoom_center.y += 0.1 * (self.target_zoom_center[1] - self.zoom_center.y);
-      do_log!("[0] {} x {} = {} ; {}", self.zoom_center.x, self.zoom_center.y, self.zoom_size, self.zoom_max_iterations);
+      self.zoom_center.x += 0.1 * (self.zoom_center_target[0] - self.zoom_center.x);
+      self.zoom_center.y += 0.1 * (self.zoom_center_target[1] - self.zoom_center.y);
     }
     else if self.zoom_max_iterations < 500 {
       self.zoom_max_iterations += 10;
-      do_log!("[1] {} x {} = {} ; {}", self.zoom_center.x, self.zoom_center.y, self.zoom_size, self.zoom_max_iterations);
     }
 
     let zoom_center = self.zoom_center;
@@ -78,12 +76,13 @@ impl FractalsManager {
       let (rect, response) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::click_and_drag());
       if response.clicked() {
         let clicked_pos = response.interact_pointer_pos();
-        let x_part = clicked_pos.unwrap().x / window_width;
-        let y_part = clicked_pos.unwrap().y / window_height;
-        self.target_zoom_center[0] = zoom_center[0] - zoom_size / 2.0 + x_part * zoom_size;
-        self.target_zoom_center[1] = zoom_center[1] + zoom_size / 2.0 - y_part * zoom_size;
-        self.stop_zooming = false;
+        let clicked_x = clicked_pos.unwrap().x / window_width;
+        let clicked_y = clicked_pos.unwrap().y / window_height;
+        self.zoom_center_target[0] = zoom_center[0] - zoom_size / 2.0 + clicked_x * zoom_size;
+        self.zoom_center_target[1] = zoom_center[1] + zoom_size / 2.0 - clicked_y * zoom_size;
+        self.zoom_stop = false;
         if response.secondary_clicked() { self.zoom_factor = 0.99 } else { self.zoom_factor = 1.01 };
+        do_log!("{} / {} ---- {} / {}", clicked_x, clicked_pos.unwrap().x, clicked_y, clicked_pos.unwrap().y);
       }
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {

@@ -40,10 +40,10 @@ vec4 mandelbrot_color_normal(vec4 v_position) {
     else {
         float val = i / float(u_iterations);
         if (u_black_and_white) {
-            resultColor = vec4(hsv2rgb(vec3(val, 1.0, 1.0)), 1.0);
+            resultColor = vec4(val, val, val, 1.0);
         }
         else {
-            resultColor = vec4(val, val, val, 1.0);
+            resultColor = vec4(hsv2rgb(vec3(val, 1.0, 1.0)), 1.0);
         }
     }
     return resultColor;

@@ -108,14 +108,16 @@ impl Mandelbrot {
       gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), self.option_iterations);
       gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_zoom_iterations").as_ref(), zoom_max_iterations);
       if self.option_blackandwhite {
-        gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 0);
+        gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 1);
       }
       else {
-        gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 1);
+        gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 0);
       }
       gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_color_palette").as_ref(), self.option_colorpalette);
       gl.uniform_2_f32(gl.get_uniform_location(self.gl_Program, "u_zoomCenter").as_ref(), zoom_center.x, zoom_center.y);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_zoomSize").as_ref(), zoom_size);
+
+      //do_log!("{} x {} = {} / {}", zoom_center.x, zoom_center.y, zoom_size, zoom_max_iterations);
 
       gl.draw_elements(glow::TRIANGLES, MANDELBROT_INDICES.len() as i32, glow::UNSIGNED_INT, 0);
 
