@@ -2,8 +2,11 @@
 
 use eframe::egui_glow;
 use eframe::glow::HasContext;
+use egui::{TextBuffer, Ui};
 use egui_glow::glow;
 use log::error;
+use strum::IntoEnumIterator;
+use strum_macros::{AsRefStr, EnumIter};
 use crate::rendering::gl_utils;
 
 #[rustfmt::skip]
@@ -76,22 +79,41 @@ impl Mandelbrot {
     }
   }
 
-  pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32, iterations: i32, black_and_white: bool, color_palette: i32, zoom_center: nalgebra_glm::Vec2, zoom_size: f32) {
+  pub fn draw_ui(&mut self, ui: &mut Ui) {
+    ui.label("Mandelbrot fractal");
+    ui.separator();
+    ui.horizontal(|ui| {
+      ui.checkbox(&mut self.option_blackandwhite, "Black and White");
+      ui.separator();
+      ui.label("Iterations:");
+      ui.add(egui::DragValue::new(&mut self.option_iterations).speed(1.0));
+      ui.separator();
+      egui::ComboBox::from_label("Color palette")
+        .selected_text(format!("{}", get_mcp(usize::try_from(self.option_colorpalette).unwrap())))
+        .show_ui(ui, |ui| {
+          ui.selectable_value(&mut self.option_colorpalette, 0, "Normal");
+          ui.selectable_value(&mut self.option_colorpalette, 1, "Grainy");
+        });
+    });
+    ui.end_row();
+  }
+
+  pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32, zoom_max_iterations: i32, zoom_center: nalgebra_glm::Vec2, zoom_size: f32) {
     unsafe {
       gl.use_program(Some(self.gl_Program));
       gl.bind_vertex_array(Some(self.gl_VAO));
 
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_width").as_ref(), screen_width);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_height").as_ref(), screen_height);
-      gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), iterations);
-      if black_and_white {
+      gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), self.option_iterations);
+      gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_zoom_iterations").as_ref(), zoom_max_iterations);
+      if self.option_blackandwhite {
         gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 0);
       }
       else {
         gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_black_and_white").as_ref(), 1);
       }
-      gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_color_palette").as_ref(), color_palette);
-
+      gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_color_palette").as_ref(), self.option_colorpalette);
       gl.uniform_2_f32(gl.get_uniform_location(self.gl_Program, "u_zoomCenter").as_ref(), zoom_center.x, zoom_center.y);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_zoomSize").as_ref(), zoom_size);
 
@@ -110,4 +132,14 @@ impl Mandelbrot {
       gl.delete_buffer(self.vbo_Indices);
     }
   }
+}
+
+#[derive(Debug, PartialEq, EnumIter, AsRefStr)]
+enum MandelbrotColorPallete {
+  Normal = 0,
+  Grainy,
+}
+
+fn get_mcp(idx: usize) -> String {
+  return MandelbrotColorPallete::iter().nth(idx).unwrap().as_ref().as_str().replace('\"', "");
 }

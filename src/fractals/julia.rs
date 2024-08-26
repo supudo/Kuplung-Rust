@@ -2,6 +2,7 @@
 
 use eframe::egui_glow;
 use eframe::glow::HasContext;
+use egui::Ui;
 use egui_glow::glow;
 use log::error;
 use crate::rendering::gl_utils;
@@ -73,14 +74,25 @@ impl Julia {
     }
   }
 
-  pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32, iterations: i32) {
+  pub fn draw_ui(&mut self, ui: &mut Ui) {
+    ui.label("Julia fractal");
+    ui.separator();
+    ui.horizontal(|ui| {
+      ui.label("Iterations:");
+      ui.add(egui::DragValue::new(&mut self.option_iterations).speed(1.0));
+    });
+    ui.separator();
+    ui.end_row();
+  }
+
+  pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32) {
     unsafe {
       gl.use_program(Some(self.gl_Program));
       gl.bind_vertex_array(Some(self.gl_VAO));
 
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_width").as_ref(), screen_width);
       gl.uniform_1_f32(gl.get_uniform_location(self.gl_Program, "u_window_height").as_ref(), screen_height);
-      gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), iterations);
+      gl.uniform_1_i32(gl.get_uniform_location(self.gl_Program, "u_iterations").as_ref(), self.option_iterations);
       gl.uniform_matrix_3_f32_slice(gl.get_uniform_location(self.gl_Program, "u_world_view").as_ref(), false, glm::Mat3x3::identity().as_slice().try_into().unwrap());
 
       gl.draw_elements(glow::TRIANGLES, JULIA_INDICES.len() as i32, glow::UNSIGNED_INT, 0);

@@ -5,13 +5,11 @@ use std::sync::Arc;
 
 use eframe::egui_glow;
 use egui::mutex::Mutex;
-use egui::{TextBuffer, Ui};
+use egui::Ui;
 use egui_glow::glow;
 
 extern crate strum_macros;
 extern crate strum;
-use strum::IntoEnumIterator;
-use strum_macros::{AsRefStr, EnumIter};
 
 use crate::fractals::julia::Julia;
 use crate::fractals::mandelbrot::Mandelbrot;
@@ -56,23 +54,7 @@ impl FractalsManager {
   }
 
   fn paint_mandelbrot(&mut self, ui: &mut Ui) {
-    ui.label("Mandelbrot fractal");
-    ui.separator();
-    let fractal_mandelbrot = self.fractal_mandelbrot.clone();
-    ui.horizontal(|ui| {
-      ui.checkbox(&mut fractal_mandelbrot.lock().option_blackandwhite, "Black and White");
-      ui.separator();
-      ui.label("Iterations:");
-      ui.add(egui::DragValue::new(&mut fractal_mandelbrot.lock().option_iterations).speed(1.0));
-      ui.separator();
-      egui::ComboBox::from_label("Color palette")
-        .selected_text(format!("{}", get_mcp(usize::try_from(fractal_mandelbrot.lock().option_colorpalette).unwrap())))
-        .show_ui(ui, |ui| {
-          ui.selectable_value(&mut fractal_mandelbrot.lock().option_colorpalette, 0, "Normal");
-          ui.selectable_value(&mut fractal_mandelbrot.lock().option_colorpalette, 1, "Grainy");
-        });
-    });
-    ui.end_row();
+    self.fractal_mandelbrot.lock().draw_ui(ui);
 
     if !self.stop_zooming {
       self.zoom_max_iterations -= 10;
@@ -87,9 +69,6 @@ impl FractalsManager {
       do_log!("[1] {} x {} = {} ; {}", self.zoom_center.x, self.zoom_center.y, self.zoom_size, self.zoom_max_iterations);
     }
 
-    let iterations = fractal_mandelbrot.lock().option_iterations;
-    let black_and_white = fractal_mandelbrot.lock().option_blackandwhite;
-    let color_palette = fractal_mandelbrot.lock().option_colorpalette;
     let zoom_center = self.zoom_center;
     let zoom_size = self.zoom_size;
     let zoom_max_iterations = self.zoom_max_iterations;
@@ -108,12 +87,7 @@ impl FractalsManager {
       }
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        if color_palette == 0 {
-          fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, iterations, black_and_white, color_palette, zoom_center, zoom_size);
-        }
-        else {
-          fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, zoom_max_iterations, black_and_white, color_palette, zoom_center, zoom_size);
-        }
+        fractal_mandelbrot.lock().paint(painter.gl(), window_width, window_height, zoom_max_iterations, zoom_center, zoom_size);
       });
       let callback = egui::PaintCallback {
         rect,
@@ -124,22 +98,14 @@ impl FractalsManager {
   }
 
   fn paint_julia(&mut self, ui: &mut Ui) {
-    ui.label("Julia fractal");
-    ui.separator();
-    let fractal_julia = self.fractal_julia.clone();
-    ui.horizontal(|ui| {
-      ui.label("Iterations:");
-      ui.add(egui::DragValue::new(&mut fractal_julia.lock().option_iterations).speed(1.0));
-    });
-    ui.separator();
-    let iterations = fractal_julia.lock().option_iterations;
+    self.fractal_julia.lock().draw_ui(ui);
     egui::Frame::canvas(ui.style()).show(ui, |ui| {
       let window_width: f32 = ui.available_size().x;
       let window_height: f32 = ui.available_size().y;
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::drag());
       let fractal_julia = self.fractal_julia.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
-        fractal_julia.lock().paint(painter.gl(), window_width, window_height, iterations);
+        fractal_julia.lock().paint(painter.gl(), window_width, window_height);
       });
       let callback = egui::PaintCallback {
         rect,
@@ -192,14 +158,4 @@ impl eframe::App for FractalsManager {
       self.fractal_julia.lock().destroy(gl);
     }
   }
-}
-
-#[derive(Debug, PartialEq, EnumIter, AsRefStr)]
-enum MandelbrotColorPallete {
-  Normal = 0,
-  Grainy,
-}
-
-fn get_mcp(idx: usize) -> String {
-  return MandelbrotColorPallete::iter().nth(idx).unwrap().as_ref().as_str().replace('\"', "");
 }

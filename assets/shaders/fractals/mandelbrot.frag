@@ -5,6 +5,7 @@ in vec4 fs_position;
 uniform float u_window_width;
 uniform float u_window_height;
 uniform int u_iterations;
+uniform int u_zoom_iterations;
 
 uniform bool u_black_and_white;
 uniform int u_color_palette;
@@ -73,7 +74,7 @@ vec4 mandelbrot_color_grainy(vec4 v_position) {
     bool escaped = false;
     int iterations;
     for (int i = 0; i < 10000; i++) {
-        if (i > u_iterations) break;
+        if (i > u_zoom_iterations) break;
         iterations = i;
         x = f(x, c0);
         if (length(x) > 2.0) {
@@ -81,7 +82,7 @@ vec4 mandelbrot_color_grainy(vec4 v_position) {
             break;
         }
     }
-    float t = float(iterations) / float(u_iterations);
+    float t = float(iterations) / float(u_zoom_iterations);
     vec3 a = vec3(0.0);
     vec3 b = vec3(0.59, 0.55, 0.75);
     vec3 c = vec3(0.1, 0.2, 0.3);
