@@ -18,6 +18,9 @@ pub static MANDELBROT_VERTICES:[f32; 12] = [
 pub static MANDELBROT_INDICES: [i32; 6] = [ 0, 1, 3, 1, 2, 3 ];
 
 pub struct Mandelbrot {
+  pub option_iterations: i32,
+  pub option_blackandwhite: bool,
+  pub option_colorpalette: i32,
   gl_Program: glow::Program,
   gl_VAO: glow::VertexArray,
   vbo_Vertices: glow::Buffer,
@@ -62,6 +65,9 @@ impl Mandelbrot {
       gl.bind_vertex_array(None);
 
       Some(Self {
+        option_iterations: 500,
+        option_blackandwhite: false,
+        option_colorpalette: 0,
         gl_Program,
         gl_VAO,
         vbo_Vertices,

@@ -19,6 +19,7 @@ pub static JULIA_VERTICES:[f32; 12] = [
 pub static JULIA_INDICES: [i32; 6] = [ 0, 1, 3, 1, 2, 3 ];
 
 pub struct Julia {
+  pub option_iterations: i32,
   gl_Program: glow::Program,
   gl_VAO: glow::VertexArray,
   vbo_Vertices: glow::Buffer,
@@ -63,6 +64,7 @@ impl Julia {
       gl.bind_vertex_array(None);
 
       Some(Self {
+        option_iterations: 256,
         gl_Program,
         gl_VAO,
         vbo_Vertices,
