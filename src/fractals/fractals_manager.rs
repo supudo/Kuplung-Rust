@@ -82,7 +82,15 @@ impl FractalsManager {
         self.zoom_center_target[1] = zoom_center[1] + zoom_size / 2.0 - clicked_y * zoom_size;
         self.zoom_stop = false;
         if response.secondary_clicked() { self.zoom_factor = 0.99 } else { self.zoom_factor = 1.01 };
-        do_log!("{} / {} ---- {} / {}", clicked_x, clicked_pos.unwrap().x, clicked_y, clicked_pos.unwrap().y);
+
+        do_log!("{} x {}", clicked_pos.unwrap().x, clicked_pos.unwrap().y);
+
+        let to_screen = egui::emath::RectTransform::from_to(egui::Rect::from_min_size(egui::Pos2::ZERO, response.rect.square_proportions()), response.rect);
+        let from_screen = to_screen.inverse();
+        if let Some(pointer_pos) = response.interact_pointer_pos() {
+          let canvas_pos = from_screen * pointer_pos;
+          //do_log!("{} x {}", canvas_pos.x, canvas_pos.y);
+        }
       }
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
