@@ -20,17 +20,10 @@ impl ShaderToy {
     do_log!("[Kuplung] [ShaderToy] Initializing...");
 
     let gl = cc.gl.as_ref()?;
-
-    let func_main = "void mainImage(out vec4 fragColor, in vec2 fragCoord)\n
-{\n
-   vec2 uv = fragCoord.xy / iResolution.xy;\n
-   fragColor = vec4(uv, 0.5 + 0.5 * sin(iGlobalTime), 1.0);\n
-}\n\n".to_owned();
-
     let this = Self {
       show_shadertoy: false,
       current_toy: "".to_string(),
-      shader_toy_engine: Arc::new(Mutex::new(ShaderToyEngine::new(gl, func_main)?))
+      shader_toy_engine: Arc::new(Mutex::new(ShaderToyEngine::new(gl)?))
     };
     do_log!("[Kuplung] [ShaderToy] Initialized.");
     Some(this)
