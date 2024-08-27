@@ -1,10 +1,13 @@
 use std::sync::Arc;
-use eframe::{egui_glow, glow};
-use eframe::epaint::mutex::Mutex;
+
+use eframe::egui_glow;
+use egui::mutex::Mutex;
 use egui::Ui;
+use egui_glow::glow;
+
+use crate::shadertoy::shadertoy_engine::ShaderToyEngine;
 use crate::do_log;
 use crate::settings::{configuration, kuplung_logger};
-use crate::shadertoy::shadertoy_engine::ShaderToyEngine;
 
 pub struct ShaderToy {
   pub show_shadertoy: bool,
@@ -22,12 +25,12 @@ impl ShaderToy {
 {\n
    vec2 uv = fragCoord.xy / iResolution.xy;\n
    fragColor = vec4(uv, 0.5 + 0.5 * sin(iGlobalTime), 1.0);\n
-}\n\n";
+}\n\n".to_owned();
 
     let this = Self {
       show_shadertoy: false,
       current_toy: "".to_string(),
-      shader_toy_engine: Arc::new(Mutex::new(ShaderToyEngine::new(gl, func_main.to_string())?))
+      shader_toy_engine: Arc::new(Mutex::new(ShaderToyEngine::new(gl, func_main)?))
     };
     do_log!("[Kuplung] [ShaderToy] Initialized.");
     Some(this)
