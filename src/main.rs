@@ -10,6 +10,7 @@ mod settings;
 mod rendering;
 mod ui;
 mod fractals;
+mod shadertoy;
 
 fn main() -> eframe::Result {
   kuplung::app::main()

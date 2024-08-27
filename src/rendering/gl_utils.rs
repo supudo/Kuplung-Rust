@@ -22,3 +22,17 @@ pub unsafe fn create_shader(program: &glow::Program, gl: &glow::Context, shader_
   gl.attach_shader(*program, shader);
   shader
 }
+
+pub unsafe fn create_shader_from_string(program: &glow::Program, gl: &glow::Context, shader_type: u32, shader_source: &str) -> glow::Shader {
+  info!("[Kuplung] Loading shader source.");
+
+  let shader = gl.create_shader(shader_type).expect("[Kuplung] [GLUtils] Cannot create shader");
+  gl.shader_source(shader, shader_source);
+  gl.compile_shader(shader);
+  if !gl.get_shader_compile_status(shader) {
+    error!("[Kuplung] [GLUtils] Failed to compile shader from source {shader_type}: {}", gl.get_shader_info_log(shader));
+    panic!("[Kuplung] [GLUtils] Failed to compile shader from source {shader_type}: {}", gl.get_shader_info_log(shader));
+  }
+  gl.attach_shader(*program, shader);
+  shader
+}

@@ -6,6 +6,7 @@ use env_logger::Env;
 use crate::fractals::fractals_manager;
 use crate::do_log;
 use crate::rendering::rendering_manager;
+use crate::shadertoy::shadertoy_manager;
 use crate::settings::{configuration, kuplung_logger};
 use crate::ui::ui_manager;
 
@@ -51,6 +52,7 @@ pub struct KuplungApp {
   manager_ui: ui_manager::UIManager,
   manager_rendering: Option<rendering_manager::RenderingManager>,
   manager_fractals: Option<fractals_manager::FractalsManager>,
+  manager_shadertoy: Option<shadertoy_manager::ShaderToy>,
 }
 
 impl KuplungApp {
@@ -68,10 +70,12 @@ impl KuplungApp {
     let manager_ui = ui_manager::UIManager::new();
     let manager_rendering = rendering_manager::RenderingManager::new(cc);
     let manager_fractals = fractals_manager::FractalsManager::new(cc);
+    let manager_shadertoy = shadertoy_manager::ShaderToy::new(cc);
     let this = Self {
       manager_ui,
       manager_rendering,
       manager_fractals,
+      manager_shadertoy,
     };
 
     do_log!("[Kuplung] egui initialized.");
@@ -89,6 +93,12 @@ impl eframe::App for KuplungApp {
         self.manager_ui.show_fractals = false;
       }
     }
+    if self.manager_ui.show_shadertoy {
+      self.manager_shadertoy.as_mut().unwrap().update(ctx, frame);
+      if !self.manager_shadertoy.as_mut().unwrap().show_shadertoy {
+        self.manager_ui.show_shadertoy = false;
+      }
+    }
   }
 
   fn on_exit(&mut self, gl: Option<&glow::Context>) {
@@ -98,6 +108,9 @@ impl eframe::App for KuplungApp {
     }
     if let Some(manager_fractals) = &mut self.manager_fractals {
       manager_fractals.on_exit(gl);
+    }
+    if let Some(manager_shadertoy) = &mut self.manager_shadertoy {
+      manager_shadertoy.on_exit(gl);
     }
   }
 }

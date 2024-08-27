@@ -89,7 +89,7 @@ impl FractalsManager {
         let from_screen = to_screen.inverse();
         if let Some(pointer_pos) = response.interact_pointer_pos() {
           let canvas_pos = from_screen * pointer_pos;
-          //do_log!("{} x {}", canvas_pos.x, canvas_pos.y);
+          do_log!("{} x {}", canvas_pos.x, canvas_pos.y);
         }
       }
       let fractal_mandelbrot = self.fractal_mandelbrot.clone();

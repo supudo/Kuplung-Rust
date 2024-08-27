@@ -45,27 +45,15 @@ impl PanelBackend {
       ui.label("Press down all modifiers and hover a widget to see a callstack for it");
     }
 
-    #[cfg(target_arch = "wasm32")]
-    {
-      ui.separator();
-      let mut screen_reader = ui.ctx().options(|o| o.screen_reader);
-      ui.checkbox(&mut screen_reader, "🔈 Screen reader").on_hover_text("Experimental feature: checking this will turn on the screen reader on supported platforms");
-      ui.ctx().options_mut(|o| o.screen_reader = screen_reader);
+    ui.separator();
+    #[allow(clippy::manual_assert)]
+    if ui.button("panic!()").clicked() {
+      panic!("intentional panic!");
     }
 
-    if cfg!(debug_assertions) && cfg!(target_arch = "wasm32") {
-      ui.separator();
-      #[allow(clippy::manual_assert)]
-      if ui.button("panic!()").clicked() {
-        panic!("intentional panic!");
-      }
-    }
-
-    if !cfg!(target_arch = "wasm32") {
-      ui.separator();
-      if ui.button("Quit").clicked() {
-        ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
-      }
+    ui.separator();
+    if ui.button("Quit").clicked() {
+      ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
     }
   }
 
@@ -73,38 +61,32 @@ impl PanelBackend {
     ui.horizontal(|ui| {
       let run_mode = &mut self.run_mode;
       ui.label("Mode:");
-      ui.radio_value(run_mode, RunMode::Reactive, "Reactive")
-        .on_hover_text("Repaint when there are animations or input (e.g. mouse movement)");
-      ui.radio_value(run_mode, RunMode::Continuous, "Continuous")
-        .on_hover_text("Repaint everything each frame");
+      ui.radio_value(run_mode, RunMode::Reactive, "Reactive").on_hover_text("Repaint when there are animations or input (e.g. mouse movement)");
+      ui.radio_value(run_mode, RunMode::Continuous, "Continuous").on_hover_text("Repaint everything each frame");
     });
 
     if self.run_mode == RunMode::Continuous {
       ui.label(format!(
         "Repainting the UI each frame.",
       ));
-    } else {
+    }
+    else {
       ui.label("Only running UI code when there are animations or input.");
 
-      if cfg!(debug_assertions) {
-        ui.collapsing("More…", |ui| {
-          ui.horizontal(|ui| {
-            ui.label("Frame number:");
-            ui.monospace(ui.ctx().frame_nr().to_string());
-          });
-          if ui
-            .button("Wait 2s, then request repaint after another 3s")
-            .clicked()
-          {
-            log::info!("Waiting 2s before requesting repaint…");
-            let ctx = ui.ctx().clone();
-            call_after_delay(std::time::Duration::from_secs(2), move || {
-              log::info!("Request a repaint in 3s…");
-              ctx.request_repaint_after(std::time::Duration::from_secs(3));
-            });
-          }
+      ui.collapsing("More…", |ui| {
+        ui.horizontal(|ui| {
+          ui.label("Frame number:");
+          ui.monospace(ui.ctx().frame_nr().to_string());
         });
-      }
+        if ui.button("Wait 2s, then request repaint after another 3s").clicked() {
+          log::info!("Waiting 2s before requesting repaint…");
+          let ctx = ui.ctx().clone();
+          call_after_delay(std::time::Duration::from_secs(2), move || {
+            log::info!("Request a repaint in 3s…");
+            ctx.request_repaint_after(std::time::Duration::from_secs(3));
+          });
+        }
+      });
     }
   }
 }
@@ -113,10 +95,7 @@ fn integration_ui(ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
   ui.horizontal(|ui| {
     ui.spacing_mut().item_spacing.x = 0.0;
     ui.label("egui running inside ");
-    ui.hyperlink_to(
-      "eframe",
-      "https://github.com/emilk/egui/tree/master/crates/eframe",
-    );
+    ui.hyperlink_to("eframe", "https://github.com/emilk/egui/tree/master/crates/eframe");
     ui.label(".");
   });
 
@@ -127,52 +106,34 @@ fn integration_ui(ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
     });
   }
 
-  #[cfg(not(target_arch = "wasm32"))]
-  {
-    ui.horizontal(|ui| {
-      {
-        let mut fullscreen = ui.input(|i| i.viewport().fullscreen.unwrap_or(false));
-        if ui
-          .checkbox(&mut fullscreen, "🗖 Fullscreen (F11)")
-          .on_hover_text("Fullscreen the window")
-          .changed()
-        {
-          ui.ctx()
-            .send_viewport_cmd(egui::ViewportCommand::Fullscreen(fullscreen));
-        }
+  ui.horizontal(|ui| {
+    {
+      let mut fullscreen = ui.input(|i| i.viewport().fullscreen.unwrap_or(false));
+      if ui.checkbox(&mut fullscreen, "🗖 Fullscreen (F11)").on_hover_text("Fullscreen the window").changed() {
+        ui.ctx().send_viewport_cmd(egui::ViewportCommand::Fullscreen(fullscreen));
       }
+    }
 
-      let mut size = None;
-      egui::ComboBox::from_id_source("viewport-size-combo")
-        .selected_text("Resize to…")
-        .show_ui(ui, |ui| {
-          ui.selectable_value(
-            &mut size,
-            Some(egui::vec2(375.0, 667.0)),
-            "📱 iPhone SE 2nd Gen",
-          );
-          ui.selectable_value(&mut size, Some(egui::vec2(393.0, 852.0)), "📱 iPhone 15");
-          ui.selectable_value(
-            &mut size,
-            Some(egui::vec2(1280.0, 720.0)),
-            "🖥 Desktop 720p",
-          );
-          ui.selectable_value(
-            &mut size,
-            Some(egui::vec2(1920.0, 1080.0)),
-            "🖥 Desktop 1080p",
-          );
-        });
+    let mut size = None;
+    egui::ComboBox::from_id_source("viewport-size-combo")
+      .selected_text("Resize to…")
+      .show_ui(ui, |ui| {
+        ui.selectable_value(
+          &mut size,
+          Some(egui::vec2(375.0, 667.0)),
+          "📱 iPhone SE 2nd Gen",
+        );
+        ui.selectable_value(&mut size, Some(egui::vec2(393.0, 852.0)), "📱 iPhone 15");
+        ui.selectable_value(&mut size, Some(egui::vec2(1280.0, 720.0)), "🖥 Desktop 720p");
+        ui.selectable_value(&mut size, Some(egui::vec2(1920.0, 1080.0)), "🖥 Desktop 1080p");
+      });
 
-      if let Some(size) = size {
-        ui.ctx()
-          .send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
-        ui.ctx()
-          .send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
-        ui.close_menu();
-      }
-    });
-  }
+    if let Some(size) = size {
+      ui.ctx().send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
+      ui.ctx().send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+      ui.close_menu();
+    }
+  });
 }
 
 struct EguiWindows {
@@ -251,7 +212,6 @@ impl EguiWindows {
             These are emitted when you interact with widgets, or move focus between them with TAB. \
             They can be hooked up to a screen reader on supported platforms.",
         );
-
         ui.separator();
       });
   }

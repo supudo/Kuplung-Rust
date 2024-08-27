@@ -23,7 +23,7 @@ pub struct UIManager {
   component_log: ComponentLog,
   pub show_viewer: bool,
   pub show_fractals: bool,
-  pub show_toys: bool,
+  pub show_shadertoy: bool,
 }
 
 impl UIManager {
@@ -39,7 +39,7 @@ impl UIManager {
       component_log: ComponentLog::new(),
       show_viewer: false,
       show_fractals: false,
-      show_toys: false,
+      show_shadertoy: false,
     };
     do_log!("[Kuplung] [UI] UI initialized.");
     this
@@ -79,6 +79,7 @@ impl UIManager {
     let shortcut_about = egui::KeyboardShortcut::new(Modifiers::NONE, egui::Key::F1);
     let shortcut_viewer = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::V);
     let shortcut_fractals = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::F);
+    let shortcut_shadertoy = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::S);
     let shortcut_component_log = egui::KeyboardShortcut::new(Modifiers::SHIFT, egui::Key::L);
 
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_quit)) { self.handle_key_escape(ui) }
@@ -89,6 +90,7 @@ impl UIManager {
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_about)) { self.toggle_about(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_viewer)) { self.toggle_window_viewer(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_fractals)) { self.toggle_window_fractals(ui); }
+    if ui.input_mut(|i| i.consume_shortcut(&shortcut_shadertoy)) { self.toggle_window_shadertoy(ui); }
     if ui.input_mut(|i| i.consume_shortcut(&shortcut_component_log)) { self.toggle_component_log(ui); }
 
     // main menu
@@ -106,15 +108,15 @@ impl UIManager {
       ui.menu_button("Rendering", |ui| {
         if ui.add(egui::Button::new("💡 Viewer").shortcut_text(ui.ctx().format_shortcut(&shortcut_viewer))).on_hover_text("View 3D renderer").clicked() { self.toggle_window_viewer(ui); }
         if ui.add(egui::Button::new("🎓 Fractals").shortcut_text(ui.ctx().format_shortcut(&shortcut_fractals))).on_hover_text("View fractals").clicked() { self.toggle_window_fractals(ui); }
-        if ui.button("🍼 Toys").clicked() { self.toggle_window_toys(ui); }
+        if ui.add(egui::Button::new("☄ ShaderToy").shortcut_text(ui.ctx().format_shortcut(&shortcut_shadertoy))).on_hover_text("View ShaderToy").clicked() { self.toggle_window_shadertoy(ui); }
       });
       ui.menu_button("View", |ui| {
         if ui.button("🛠 Options").on_hover_text("Configure Kuplung options").clicked() { self.toggle_options(ui); }
         if ui.add(egui::Button::new("🖹 Log").shortcut_text(ui.ctx().format_shortcut(&shortcut_component_log))).on_hover_text("Toggle log window").clicked() { self.toggle_component_log(ui); }
+        if ui.add(egui::Button::new("📺 Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
       });
       ui.menu_button("Help", |ui| {
         if ui.button("📉 Metrics").on_hover_text("Show scene stats").clicked() { }
-        if ui.add(egui::Button::new("📺 Backend").shortcut_text(ui.ctx().format_shortcut(&shortcut_backend))).on_hover_text("View egui backend").clicked() { self.toggle_backend(ui); }
         ui.separator();
         if ui.button("About Kuplung").clicked() { self.toggle_about(ui); }
       });
@@ -198,9 +200,9 @@ impl UIManager {
     self.show_fractals = !self.show_fractals;
   }
 
-  fn toggle_window_toys(&mut self, ui: &mut Ui) {
+  fn toggle_window_shadertoy(&mut self, ui: &mut Ui) {
     ui.close_menu();
-    self.show_toys = !self.show_toys;
+    self.show_shadertoy = !self.show_shadertoy;
   }
 
   fn toggle_options(&mut self, ui: &mut Ui) {
