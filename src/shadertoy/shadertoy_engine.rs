@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use eframe::egui_glow;
-use eframe::glow::HasContext;
+use eframe::glow::{HasContext, NativeUniformLocation};
 use egui_glow::glow;
 use log::error;
 use crate::do_log;
@@ -57,50 +57,15 @@ pub struct ShaderToyEngine {
 
 #[allow(unsafe_code)]
 impl ShaderToyEngine {
-  pub fn new(gl: &glow::Context, toy: String) -> Option<Self> {
+  pub fn new(gl: &glow::Context) -> Option<Self> {
     use glow::HasContext as _;
     unsafe {
       let shaderProgram = gl.create_program().expect("[Kuplung] [ShaderToy-Engine] Cannot create program!");
 
       let shader_vertex = gl_utils::create_shader(&shaderProgram, &gl, glow::VERTEX_SHADER, "assets/shaders/shadertoy/shadertoy.vert");
 
-      let mut shaderFragmentSource: String = "#version 410 core\n
-\n
-out vec4 outFragmentColor;\n
-uniform vec3 iResolution;\n
-uniform float iGlobalTime;\n
-uniform float iTimeDelta;\n
-uniform int iFrame;\n
-uniform int iFrameRate;\n
-uniform float iChannelTime[4];\n
-uniform vec3 iChannelResolution[4];\n
-uniform vec4 iMouse;\n
-uniform vec4 iDate;\n
-uniform float iSampleRate;\n
-uniform sampler2D iChannel0;\n
-//uniform samplerCube iChannel0;\n
-uniform sampler2D iChannel1;\n
-//uniform samplerCube iChannel1;\n
-uniform sampler2D iChannel2;\n
-//uniform samplerCube iChannel2;\n
-uniform sampler2D iChannel3;\n
-//uniform samplerCube iChannel3;\n
-\n
-#define texture2D texture\n
-#define textureCube texture\n
-\n".to_owned();
-
-      shaderFragmentSource.push_str(toy.as_str());
-
-      shaderFragmentSource.push_str("\n
-void main() {\n
-    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n
-    mainImage(color, gl_FragCoord.xy);\n
-    outFragmentColor = color;\n
-}\n
-\n");
-
-      let shader_fragment = gl_utils::create_shader_from_string(&shaderProgram, &gl, glow::FRAGMENT_SHADER, shaderFragmentSource.as_ref());
+      let stoy = Self::get_stoy("".to_string());
+      let shader_fragment = gl_utils::create_shader_from_string(&shaderProgram, &gl, glow::FRAGMENT_SHADER, stoy.as_ref());
 
       gl.link_program(shaderProgram);
       if !gl.get_program_link_status(shaderProgram) {
@@ -116,22 +81,22 @@ void main() {\n
       let vs_InFBO = gl.get_uniform_location(shaderProgram, "vs_inFBO")?;
       let vs_ScreenResolution = gl.get_uniform_location(shaderProgram, "vs_screenResolution")?;
 
-      let iResolution = gl.get_uniform_location(shaderProgram, "iResolution")?;
-      let iGlobalTime = gl.get_uniform_location(shaderProgram, "iGlobalTime")?;
-      let iTimeDelta = gl.get_uniform_location(shaderProgram, "iTimeDelta")?;
-      let iFrameRate = gl.get_uniform_location(shaderProgram, "iFrameRate")?;
-      let iFrame = gl.get_uniform_location(shaderProgram, "iFrame")?;
+      let iResolution = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iResolution")?;
+      let iGlobalTime = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iGlobalTime")?;
+      let iTimeDelta = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iTimeDelta")?;
+      let iFrameRate = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iFrameRate")?;
+      let iFrame = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iFrame")?;
       let iChannelTime: [glow::UniformLocation; 4] = [
-        gl.get_uniform_location(shaderProgram, "iChannelTime[0]")?,
-        gl.get_uniform_location(shaderProgram, "iChannelTime[1]")?,
-        gl.get_uniform_location(shaderProgram, "iChannelTime[2]")?,
-        gl.get_uniform_location(shaderProgram, "iChannelTime[3]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[0]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[1]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[2]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[3]")?,
       ];
       let iChannelResolution: [glow::UniformLocation; 4] = [
-        gl.get_uniform_location(shaderProgram, "iChannelResolution[0]")?,
-        gl.get_uniform_location(shaderProgram, "iChannelResolution[1]")?,
-        gl.get_uniform_location(shaderProgram, "iChannelResolution[2]")?,
-        gl.get_uniform_location(shaderProgram, "iChannelResolution[3]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[0]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[1]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[2]")?,
+        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[3]")?,
       ];
       let iMouse = gl.get_uniform_location(shaderProgram, "iMouse")?;
       let iDate = gl.get_uniform_location(shaderProgram, "iDate")?;
@@ -139,6 +104,9 @@ void main() {\n
       let iChannel1 = gl.get_uniform_location(shaderProgram, "iChannel1")?;
       let iChannel2 = gl.get_uniform_location(shaderProgram, "iChannel2")?;
       let iChannel3 = gl.get_uniform_location(shaderProgram, "iChannel3")?;
+
+      let tFBO = gl.create_framebuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create FBO!");
+      let tRBO = gl.create_renderbuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create RBO!");
 
       let glVAO = gl.create_vertex_array().expect("[Kuplung] [ShaderToy-Engine] Cannot create VAO!");
       gl.bind_vertex_array(Some(glVAO));
@@ -149,9 +117,6 @@ void main() {\n
 
       gl.vertex_attrib_pointer_f32(0, 3, glow::FLOAT, false, 0, 0);
       gl.enable_vertex_attrib_array(0);
-
-      let tFBO = gl.create_framebuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create FBO!");
-      let tRBO = gl.create_renderbuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create RBO!");
 
       gl.bind_vertex_array(None);
 
@@ -207,6 +172,51 @@ void main() {\n
         tRBO
       })
     }
+  }
+
+  pub fn get_stoy(stoy: String) -> String {
+    let mut shaderFragmentSource: String = "#version 410 core\n
+\n
+out vec4 outFragmentColor;\n
+uniform vec3 iResolution;\n
+uniform float iGlobalTime;\n
+uniform float iTimeDelta;\n
+uniform int iFrame;\n
+uniform int iFrameRate;\n
+uniform float iChannelTime[4];\n
+uniform vec3 iChannelResolution[4];\n
+uniform vec4 iMouse;\n
+uniform vec4 iDate;\n
+\n
+uniform sampler2D iChannel0;\n
+//uniform samplerCube iChannel0;\n
+uniform sampler2D iChannel1;\n
+//uniform samplerCube iChannel1;\n
+uniform sampler2D iChannel2;\n
+//uniform samplerCube iChannel2;\n
+uniform sampler2D iChannel3;\n
+//uniform samplerCube iChannel3;\n
+\n
+#define texture2D texture\n
+//#define textureCube texture\n
+\n".to_owned();
+
+    if stoy.is_empty() {
+      shaderFragmentSource.push_str("\n
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n
+   vec2 uv = fragCoord.xy / iResolution.xy;\n
+   fragColor = vec4(uv, 0.5 + 0.5 * sin(iGlobalTime), 1.0);\n
+}\n\n");
+    }
+
+    shaderFragmentSource.push_str("\n
+void main() {\n
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n
+    mainImage(color, gl_FragCoord.xy);\n
+    outFragmentColor = color;\n
+}\n
+\n");
+    shaderFragmentSource
   }
 
   pub fn setup_fbo(&self, gl: &glow::Context, screen_width: f32, screen_height: f32) {
