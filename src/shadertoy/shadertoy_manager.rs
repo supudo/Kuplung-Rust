@@ -35,10 +35,9 @@ impl ShaderToy {
       let window_height: f32 = ui.available_height();
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::click_and_drag());
       let shader_toy_engine = self.shader_toy_engine.clone();
-      let current_toy = self.current_toy.to_string();
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
         shader_toy_engine.lock().setup_fbo(painter.gl(), window_width, window_height);
-        shader_toy_engine.lock().paint(painter.gl(), &current_toy, window_width, window_height);
+        shader_toy_engine.lock().paint(painter.gl(), window_width, window_height);
       });
       let callback = egui::PaintCallback {
         rect,

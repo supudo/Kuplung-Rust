@@ -214,13 +214,15 @@ void main() {
     }
   }
 
-  pub fn paint(&self, gl: &glow::Context, toy: &str, screen_width: f32, screen_height: f32) {
+  pub fn paint(&self, gl: &glow::Context, screen_width: f32, screen_height: f32) {
     unsafe {
       gl.use_program(Some(self.shaderProgram));
       gl.bind_vertex_array(Some(self.glVAO));
 
       gl.uniform_2_f32(Option::from(&self.vs_ScreenResolution), screen_width, screen_height);
-      gl.uniform_2_f32(Option::from(&self.iResolution), screen_width, screen_height);
+      gl.uniform_3_f32(Option::from(&self.iResolution), screen_width, screen_height, 1.0);
+      gl.uniform_1_f32(Option::from(&self.iGlobalTime), 1.0);
+      gl.uniform_1_f32(Option::from(&self.iTimeDelta), 1.0);
 
       gl.draw_arrays(glow::TRIANGLES, 0, 6);
 
