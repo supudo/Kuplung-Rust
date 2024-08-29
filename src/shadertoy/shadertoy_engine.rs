@@ -32,6 +32,8 @@ pub struct ShaderToyEngine {
   shaderProgram: glow::Program,
   glVAO: glow::VertexArray,
   vboVertices: glow::Buffer,
+  tFBO: glow::Framebuffer,
+  tRBO: glow::Renderbuffer,
   vs_InFBO: glow::UniformLocation,
   vs_ScreenResolution: glow::UniformLocation,
   iChannelResolution0: [f32; 2],
@@ -47,12 +49,6 @@ pub struct ShaderToyEngine {
   iChannelResolution: [glow::UniformLocation; 4],
   iMouse: glow::UniformLocation,
   iDate: glow::UniformLocation,
-  iChannel0: glow::UniformLocation,
-  iChannel1: glow::UniformLocation,
-  iChannel2: glow::UniformLocation,
-  iChannel3: glow::UniformLocation,
-  tFBO: glow::Framebuffer,
-  tRBO: glow::Renderbuffer,
 }
 
 #[allow(unsafe_code)]
@@ -78,35 +74,28 @@ impl ShaderToyEngine {
       gl.detach_shader(shaderProgram, shader_fragment);
       gl.delete_shader(shader_fragment);
 
-      let vs_InFBO = gl.get_uniform_location(shaderProgram, "vs_inFBO")?;
-      let vs_ScreenResolution = gl.get_uniform_location(shaderProgram, "vs_screenResolution")?;
+      let vs_InFBO = gl_utils::get_uniform(&shaderProgram, &gl, "vs_inFBO");
+      let vs_ScreenResolution = gl_utils::get_uniform(&shaderProgram, &gl, "vs_screenResolution");
 
-      let iResolution = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iResolution")?;
-      let iGlobalTime = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iGlobalTime")?;
-      let iTimeDelta = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iTimeDelta")?;
-      let iFrameRate = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iFrameRate")?;
-      let iFrame = NativeUniformLocation(0);//gl.get_uniform_location(shaderProgram, "iFrame")?;
+      let iResolution = gl_utils::get_uniform(&shaderProgram, &gl, "iResolution");
+      let iGlobalTime = gl_utils::get_uniform(&shaderProgram, &gl, "iGlobalTime");
+      let iTimeDelta = gl_utils::get_uniform(&shaderProgram, &gl, "iTimeDelta");
+      let iFrameRate = gl_utils::get_uniform(&shaderProgram, &gl, "iFrameRate");
+      let iFrame = gl_utils::get_uniform(&shaderProgram, &gl, "iFrame");
       let iChannelTime: [glow::UniformLocation; 4] = [
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[0]")?,
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[1]")?,
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[2]")?,
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelTime[3]")?,
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[0]"),
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[1]"),
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[2]"),
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[3]"),
       ];
       let iChannelResolution: [glow::UniformLocation; 4] = [
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[0]")?,
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[1]")?,
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[2]")?,
-        NativeUniformLocation(0),//gl.get_uniform_location(shaderProgram, "iChannelResolution[3]")?,
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[0]"),
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[1]"),
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[2]"),
+        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[3]"),
       ];
-      let iMouse = gl.get_uniform_location(shaderProgram, "iMouse")?;
-      let iDate = gl.get_uniform_location(shaderProgram, "iDate")?;
-      let iChannel0 = gl.get_uniform_location(shaderProgram, "iChannel0")?;
-      let iChannel1 = gl.get_uniform_location(shaderProgram, "iChannel1")?;
-      let iChannel2 = gl.get_uniform_location(shaderProgram, "iChannel2")?;
-      let iChannel3 = gl.get_uniform_location(shaderProgram, "iChannel3")?;
-
-      let tFBO = gl.create_framebuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create FBO!");
-      let tRBO = gl.create_renderbuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create RBO!");
+      let iMouse = gl_utils::get_uniform(&shaderProgram, &gl, "iMouse");
+      let iDate = gl_utils::get_uniform(&shaderProgram, &gl, "iDate");
 
       let glVAO = gl.create_vertex_array().expect("[Kuplung] [ShaderToy-Engine] Cannot create VAO!");
       gl.bind_vertex_array(Some(glVAO));
@@ -117,6 +106,9 @@ impl ShaderToyEngine {
 
       gl.vertex_attrib_pointer_f32(0, 3, glow::FLOAT, false, 0, 0);
       gl.enable_vertex_attrib_array(0);
+
+      let tFBO = gl.create_framebuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create FBO!");
+      let tRBO = gl.create_renderbuffer().expect("[Kuplung] [ShaderToy-Engine] Cannot create RBO!");
 
       gl.bind_vertex_array(None);
 
@@ -149,6 +141,8 @@ impl ShaderToyEngine {
         shaderProgram,
         glVAO,
         vboVertices,
+        tFBO,
+        tRBO,
         vs_InFBO,
         vs_ScreenResolution,
         iChannelResolution0,
@@ -164,12 +158,6 @@ impl ShaderToyEngine {
         iChannelResolution,
         iMouse,
         iDate,
-        iChannel0,
-        iChannel1,
-        iChannel2,
-        iChannel3,
-        tFBO,
-        tRBO
       })
     }
   }
@@ -216,6 +204,7 @@ void main() {\n
     outFragmentColor = color;\n
 }\n
 \n");
+    do_log!("{}", shaderFragmentSource.as_str());
     shaderFragmentSource
   }
 
@@ -232,8 +221,8 @@ void main() {\n
       gl.use_program(Some(self.shaderProgram));
       gl.bind_vertex_array(Some(self.glVAO));
 
-      gl.uniform_1_f32(gl.get_uniform_location(self.shaderProgram, "u_window_width").as_ref(), screen_width);
-      gl.uniform_1_f32(gl.get_uniform_location(self.shaderProgram, "u_window_height").as_ref(), screen_height);
+      gl.uniform_2_f32(Option::from(&self.vs_ScreenResolution), screen_width, screen_height);
+      gl.uniform_2_f32(Option::from(&self.iResolution), screen_width, screen_height);
 
       gl.draw_arrays(glow::TRIANGLES, 0, 6);
 
