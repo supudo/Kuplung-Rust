@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use eframe::egui_glow;
 use egui::mutex::Mutex;
-use egui::{TextBuffer, Ui};
+use egui::Ui;
 use egui_glow::glow;
 
 use crate::shadertoy::shadertoy_engine::ShaderToyEngine;

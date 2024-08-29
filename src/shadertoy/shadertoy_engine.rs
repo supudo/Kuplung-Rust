@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 use eframe::egui_glow;
-use eframe::glow::{HasContext, NativeUniformLocation};
+use eframe::glow::HasContext;
 use egui_glow::glow;
 use log::error;
 use crate::do_log;
@@ -45,8 +45,8 @@ pub struct ShaderToyEngine {
   iTimeDelta: glow::UniformLocation,
   iFrame: glow::UniformLocation,
   iFrameRate: glow::UniformLocation,
-  iChannelTime: [glow::UniformLocation; 4],
-  iChannelResolution: [glow::UniformLocation; 4],
+  /*iChannelTime: [glow::UniformLocation; 4],
+  iChannelResolution: [glow::UniformLocation; 4],*/
   iMouse: glow::UniformLocation,
   iDate: glow::UniformLocation,
 }
@@ -74,28 +74,28 @@ impl ShaderToyEngine {
       gl.detach_shader(shaderProgram, shader_fragment);
       gl.delete_shader(shader_fragment);
 
-      let vs_InFBO = gl_utils::get_uniform(&shaderProgram, &gl, "vs_inFBO");
-      let vs_ScreenResolution = gl_utils::get_uniform(&shaderProgram, &gl, "vs_screenResolution");
+      let vs_InFBO = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "vs_inFBO");
+      let vs_ScreenResolution = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "vs_screenResolution");
 
-      let iResolution = gl_utils::get_uniform(&shaderProgram, &gl, "iResolution");
-      let iGlobalTime = gl_utils::get_uniform(&shaderProgram, &gl, "iGlobalTime");
-      let iTimeDelta = gl_utils::get_uniform(&shaderProgram, &gl, "iTimeDelta");
-      let iFrameRate = gl_utils::get_uniform(&shaderProgram, &gl, "iFrameRate");
-      let iFrame = gl_utils::get_uniform(&shaderProgram, &gl, "iFrame");
-      let iChannelTime: [glow::UniformLocation; 4] = [
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[0]"),
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[1]"),
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[2]"),
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelTime[3]"),
+      let iResolution = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iResolution");
+      let iGlobalTime = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iGlobalTime");
+      let iTimeDelta = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iTimeDelta");
+      let iFrameRate = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iFrameRate");
+      let iFrame = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iFrame");
+      /*let iChannelTime: [glow::UniformLocation; 4] = [
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelTime[0]"),
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelTime[1]"),
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelTime[2]"),
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelTime[3]"),
       ];
       let iChannelResolution: [glow::UniformLocation; 4] = [
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[0]"),
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[1]"),
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[2]"),
-        gl_utils::get_uniform(&shaderProgram, &gl, "iChannelResolution[3]"),
-      ];
-      let iMouse = gl_utils::get_uniform(&shaderProgram, &gl, "iMouse");
-      let iDate = gl_utils::get_uniform(&shaderProgram, &gl, "iDate");
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelResolution[0]"),
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelResolution[1]"),
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelResolution[2]"),
+        gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iChannelResolution[3]"),
+      ];*/
+      let iMouse = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iMouse");
+      let iDate = gl_utils::get_uniform_no_warning(&shaderProgram, &gl, "iDate");
 
       let glVAO = gl.create_vertex_array().expect("[Kuplung] [ShaderToy-Engine] Cannot create VAO!");
       gl.bind_vertex_array(Some(glVAO));
@@ -154,8 +154,8 @@ impl ShaderToyEngine {
         iTimeDelta,
         iFrame,
         iFrameRate,
-        iChannelTime,
-        iChannelResolution,
+        /*iChannelTime,
+        iChannelResolution,*/
         iMouse,
         iDate,
       })
@@ -194,10 +194,23 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
    vec2 uv = fragCoord.xy / iResolution.xy;
    fragColor = vec4(uv, 0.5 + 0.5 * sin(iGlobalTime), 1.0);
 }
+
+void dummy() {
+  float f = iTimeDelta * iChannelTime[0] * iChannelTime[1] * iChannelTime[2] * iChannelTime[3];
+  vec3 v3 = iChannelResolution[0] * iChannelResolution[1] * iChannelResolution[2] * iChannelResolution[3];
+  int i = iFrame * iFrameRate;
+  vec4 v4 = iMouse * iDate;
+
+  vec2 s1 = texture2D(iChannel0,vec2(0,0)).xy;
+  vec2 s2 = texture2D(iChannel1,vec2(0,0)).xy;
+  vec2 s3 = texture2D(iChannel2,vec2(0,0)).xy;
+  vec2 s4 = texture2D(iChannel3,vec2(0,0)).xy;
+}
 "#);
     }
     shaderFragmentSource.push_str(r#"
 void main() {
+    dummy();
     vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
     mainImage(color, gl_FragCoord.xy);
     outFragmentColor = color;
