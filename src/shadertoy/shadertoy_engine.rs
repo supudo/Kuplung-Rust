@@ -163,48 +163,46 @@ impl ShaderToyEngine {
   }
 
   pub fn get_stoy(stoy: String) -> String {
-    let mut shaderFragmentSource: String = "#version 410 core\n
-\n
-out vec4 outFragmentColor;\n
-uniform vec3 iResolution;\n
-uniform float iGlobalTime;\n
-uniform float iTimeDelta;\n
-uniform int iFrame;\n
-uniform int iFrameRate;\n
-uniform float iChannelTime[4];\n
-uniform vec3 iChannelResolution[4];\n
-uniform vec4 iMouse;\n
-uniform vec4 iDate;\n
-\n
-uniform sampler2D iChannel0;\n
-//uniform samplerCube iChannel0;\n
-uniform sampler2D iChannel1;\n
-//uniform samplerCube iChannel1;\n
-uniform sampler2D iChannel2;\n
-//uniform samplerCube iChannel2;\n
-uniform sampler2D iChannel3;\n
-//uniform samplerCube iChannel3;\n
-\n
-#define texture2D texture\n
-//#define textureCube texture\n
-\n".to_owned();
+    let mut shaderFragmentSource = String::from(r#"#version 410 core
 
+out vec4 outFragmentColor;
+uniform vec3 iResolution;
+uniform float iGlobalTime;
+uniform float iTimeDelta;
+uniform int iFrame;
+uniform int iFrameRate;
+uniform float iChannelTime[4];
+uniform vec3 iChannelResolution[4];
+uniform vec4 iMouse;
+uniform vec4 iDate;
+
+uniform sampler2D iChannel0;
+//uniform samplerCube iChannel0;
+uniform sampler2D iChannel1;
+//uniform samplerCube iChannel1;
+uniform sampler2D iChannel2;
+//uniform samplerCube iChannel2;
+uniform sampler2D iChannel3;
+//uniform samplerCube iChannel3;
+
+#define texture2D texture
+//#define textureCube texture
+"#);
     if stoy.is_empty() {
-      shaderFragmentSource.push_str("\n
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {\n
-   vec2 uv = fragCoord.xy / iResolution.xy;\n
-   fragColor = vec4(uv, 0.5 + 0.5 * sin(iGlobalTime), 1.0);\n
-}\n\n");
+      shaderFragmentSource.push_str(r#"
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+   vec2 uv = fragCoord.xy / iResolution.xy;
+   fragColor = vec4(uv, 0.5 + 0.5 * sin(iGlobalTime), 1.0);
+}
+"#);
     }
-
-    shaderFragmentSource.push_str("\n
-void main() {\n
-    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n
-    mainImage(color, gl_FragCoord.xy);\n
-    outFragmentColor = color;\n
-}\n
-\n");
-    do_log!("{}", shaderFragmentSource.as_str());
+    shaderFragmentSource.push_str(r#"
+void main() {
+    vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+    mainImage(color, gl_FragCoord.xy);
+    outFragmentColor = color;
+}
+"#);
     shaderFragmentSource
   }
 
