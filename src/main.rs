@@ -11,6 +11,7 @@ mod rendering;
 mod ui;
 mod fractals;
 mod shadertoy;
+mod utils;
 
 fn main() -> eframe::Result {
   kuplung::app::main()

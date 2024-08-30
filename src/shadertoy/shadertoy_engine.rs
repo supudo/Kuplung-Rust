@@ -4,7 +4,7 @@ use eframe::egui_glow;
 use eframe::glow::HasContext;
 use egui_glow::glow;
 use log::error;
-use crate::do_log;
+use crate::{do_log, utils};
 use crate::settings::kuplung_logger;
 use crate::rendering::gl_utils;
 
@@ -54,14 +54,17 @@ pub struct ShaderToyEngine {
 #[allow(unsafe_code)]
 impl ShaderToyEngine {
   pub fn new(gl: &glow::Context) -> Option<Self> {
+    Self::compile_shadertoy(gl, "".to_string())
+  }
+
+  pub fn compile_shadertoy(gl: &glow::Context, stoy: String) -> Option<Self> {
     use glow::HasContext as _;
     unsafe {
       let shaderProgram = gl.create_program().expect("[Kuplung] [ShaderToy-Engine] Cannot create program!");
 
       let shader_vertex = gl_utils::create_shader(&shaderProgram, &gl, glow::VERTEX_SHADER, "assets/shaders/shadertoy/shadertoy.vert");
 
-      let stoy = Self::get_stoy("".to_string());
-      let shader_fragment = gl_utils::create_shader_from_string(&shaderProgram, &gl, glow::FRAGMENT_SHADER, stoy.as_ref());
+      let shader_fragment = gl_utils::create_shader_from_string(&shaderProgram, &gl, glow::FRAGMENT_SHADER, Self::get_stoy(stoy).as_ref());
 
       gl.link_program(shaderProgram);
       if !gl.get_program_link_status(shaderProgram) {
@@ -186,7 +189,7 @@ uniform sampler2D iChannel3;
 //uniform samplerCube iChannel3;
 
 #define texture2D texture
-//#define textureCube texture
+#define textureCube texture
 "#);
     if stoy.is_empty() {
       shaderFragmentSource.push_str(r#"
@@ -194,8 +197,14 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
    vec2 uv = fragCoord.xy / iResolution.xy;
    fragColor = vec4(uv, 0.5 + 0.5 * sin(iGlobalTime), 1.0);
 }
-
-void dummy() {
+"#);
+    }
+    else {
+      let shader_source = utils::file_io::read_shadertoy_shader(format!("{}.stoy", stoy).as_str());
+      shaderFragmentSource.push_str(shader_source.unwrap().as_str());
+    }
+    shaderFragmentSource.push_str(r#"
+void glslOptimizerFix() {
   float f = iTimeDelta * iChannelTime[0] * iChannelTime[1] * iChannelTime[2] * iChannelTime[3];
   vec3 v3 = iChannelResolution[0] * iChannelResolution[1] * iChannelResolution[2] * iChannelResolution[3];
   int i = iFrame * iFrameRate;
@@ -206,17 +215,19 @@ void dummy() {
   vec2 s3 = texture2D(iChannel2,vec2(0,0)).xy;
   vec2 s4 = texture2D(iChannel3,vec2(0,0)).xy;
 }
-"#);
-    }
-    shaderFragmentSource.push_str(r#"
+
 void main() {
-    dummy();
+    glslOptimizerFix();
     vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
     mainImage(color, gl_FragCoord.xy);
     outFragmentColor = color;
 }
 "#);
     shaderFragmentSource
+  }
+
+  pub fn reload_shadertoy(&mut self, stoy: &str, gl: &glow::Context) {
+    Self::compile_shadertoy(gl, stoy.to_string());
   }
 
   pub fn setup_fbo(&self, gl: &glow::Context, screen_width: f32, screen_height: f32) {

@@ -11,6 +11,7 @@ use crate::settings::{configuration, kuplung_logger};
 
 pub struct ShaderToy {
   pub show_shadertoy: bool,
+  previous_toy: String,
   current_toy: String,
   shader_toy_engine: Arc<Mutex<ShaderToyEngine>>
 }
@@ -22,6 +23,7 @@ impl ShaderToy {
     let gl = cc.gl.as_ref()?;
     let this = Self {
       show_shadertoy: false,
+      previous_toy: "".to_string(),
       current_toy: "".to_string(),
       shader_toy_engine: Arc::new(Mutex::new(ShaderToyEngine::new(gl)?))
     };
@@ -35,7 +37,11 @@ impl ShaderToy {
       let window_height: f32 = ui.available_height();
       let (rect, _) = ui.allocate_exact_size(egui::Vec2::from([window_width, window_height]), egui::Sense::click_and_drag());
       let shader_toy_engine = self.shader_toy_engine.clone();
+      let current_toy = self.current_toy.clone();
+      let mut recompile = false;
+      if self.current_toy.clone() != self.previous_toy { recompile = true; }
       let cb = egui_glow::CallbackFn::new(move |_, painter| {
+        if recompile { shader_toy_engine.lock().reload_shadertoy(&current_toy, painter.gl()); }
         shader_toy_engine.lock().setup_fbo(painter.gl(), window_width, window_height);
         shader_toy_engine.lock().paint(painter.gl(), window_width, window_height);
       });
@@ -71,6 +77,18 @@ impl eframe::App for ShaderToy {
             }
             if ui.button("Combustible Voronoi Layers").clicked() {
               self.current_toy = "4tlSzl".to_string();
+              ui.close_menu();
+            }
+            if ui.button("Seascape").clicked() {
+              self.current_toy = "Ms2SD1".to_string();
+              ui.close_menu();
+            }
+            if ui.button("Star Nest").clicked() {
+              self.current_toy = "XlfGRj".to_string();
+              ui.close_menu();
+            }
+            if ui.button("Sun Surface").clicked() {
+              self.current_toy = "XlSSzK".to_string();
               ui.close_menu();
             }
           });
