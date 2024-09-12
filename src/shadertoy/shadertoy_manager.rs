@@ -13,6 +13,7 @@ pub struct ShaderToy {
   pub show_shadertoy: bool,
   previous_toy: String,
   current_toy: String,
+  current_source: String,
   shader_toy_engine: Arc<Mutex<ShaderToyEngine>>
 }
 
@@ -25,6 +26,7 @@ impl ShaderToy {
       show_shadertoy: false,
       previous_toy: "".to_string(),
       current_toy: "".to_string(),
+      current_source: "".into(),
       shader_toy_engine: Arc::new(Mutex::new(ShaderToyEngine::new(gl)?))
     };
     do_log!("[Kuplung] [ShaderToy] Initialized.");
@@ -93,6 +95,37 @@ impl eframe::App for ShaderToy {
             }
           });
         });
+        ui.separator();
+        if ui.button("Compile").clicked() {
+        }
+
+        let mut theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+        ui.collapsing("Theme", |ui| {
+          ui.group(|ui| {
+            theme.ui(ui);
+            theme.clone().store_in_memory(ui.ctx());
+          });
+        });
+
+        let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
+          let mut layout_job = egui_extras::syntax_highlighting::highlight(ui.ctx(), &theme, string, "rs");
+          layout_job.wrap.max_width = wrap_width;
+          ui.fonts(|f| f.layout_job(layout_job))
+        };
+
+        let s_code = self.current_source.clone();
+        egui::ScrollArea::vertical().show(ui, |ui| {
+          ui.add(
+            egui::TextEdit::multiline(&mut s_code)
+              .font(egui::TextStyle::Monospace) // for cursor height
+              .code_editor()
+              .desired_rows(10)
+              .lock_focus(true)
+              .desired_width(f32::INFINITY)
+              .layouter(&mut layouter),
+          );
+        });
+
         ui.separator();
         self.render_toy(ui);
       });
