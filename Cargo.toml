@@ -4,7 +4,7 @@ description = "Rust port of Kuplung"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/supudo/Kuplung-Rust"
-authors = ["Sergey Petrov <supudo@gmail.com>"]
+authors = ["Sergey Petrov <supudodev@gmail.com>"]
 keywords = ["OpenGL", "graphics", "rendering"]
 build = "build.rs"
 
